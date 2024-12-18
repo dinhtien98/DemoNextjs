@@ -38,6 +38,10 @@ body {
   background-color: white; 
 }
 
+.p-password-input{
+  width: 100%;
+}
+
 .main{
   height: 120vh;
 }
