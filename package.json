@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "next": "15.1.0",
+    "next-auth": "^4.24.11",
+    "nookies": "^2.5.2",
     "primeicons": "^7.0.0",
     "primereact": "^10.8.5",
     "react": "^19.0.0",
