@@ -1,18 +1,18 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
+import React, { useEffect, useState } from 'react';
 
 interface DataItem {
     id: string;
-    code: string;
-    name: string;
-    parentcode: string;
-    level: string;
-    url: string;
-    hidden: boolean;
-    icon: string;
-    sort: number;
+    userName: string;
+    password: string;
+    firstLogin: string;
+    inDate: string;
+    outDate: string;
+    failCount: string;
+    isLocked: boolean;
+    lastLogin: string;
     createdtime: string;
     createdby: string;
     updatedtime: string;
@@ -20,6 +20,9 @@ interface DataItem {
     deletedtime: string;
     deletedby: string;
     deletedflag: boolean;
+    fullName: string;
+    email: string;
+    avatar: string;
 }
 
 export default function Page() {
@@ -27,7 +30,7 @@ export default function Page() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:5004/api/authPage');
+            const response = await fetch('http://localhost:5004/api/authUser');
             if (!response.ok) {
                 throw new Error('Failed to fetch data');
             }
@@ -58,7 +61,7 @@ export default function Page() {
     };
 
     return (
-        <div className="listPage">
+        <div className="listUser">
             <DataTable
                 value={data}
                 paginator
