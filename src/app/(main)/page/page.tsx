@@ -27,7 +27,7 @@ export default function Page() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:5004/api/authPage');
+            const response = await fetch('https://localhost:7223/api/authPage');
             if (!response.ok) {
                 throw new Error('Failed to fetch data');
             }

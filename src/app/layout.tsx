@@ -5,7 +5,8 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { PrimeReactProvider } from 'primereact/api';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
-import 'primeicons/primeicons.css'; 
+import 'primeicons/primeicons.css';
+import Providers from './components/providers';
 
 
 
@@ -35,9 +36,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <PrimeReactProvider>
-          <Header/>
-          {children}
-          <Footer/>
+          <Header />
+          <Providers>
+            {children}
+          </Providers>
+          <Footer />
         </PrimeReactProvider>
       </body>
     </html>
