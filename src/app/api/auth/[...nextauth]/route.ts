@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import NextAuth, { Session } from "next-auth";
+=======
+import NextAuth from "next-auth";
+>>>>>>> 28163bc8fed5e07007687a8c8fddf83e3b25e5c7
 import CredentialsProvider from "next-auth/providers/credentials";
 
 declare module "next-auth" {
@@ -54,10 +58,13 @@ const handler = NextAuth({
             }
         })
     ],
+<<<<<<< HEAD
 
     pages: {
         signIn: "/login",
     },
+=======
+>>>>>>> 28163bc8fed5e07007687a8c8fddf83e3b25e5c7
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
@@ -69,7 +76,11 @@ const handler = NextAuth({
             return token;
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+<<<<<<< HEAD
         async session({ session, token }: { session: Session; token: any }) {
+=======
+        async session({ session, token }: { session: any; token: any }) {
+>>>>>>> 28163bc8fed5e07007687a8c8fddf83e3b25e5c7
             if (token && session.user) {
                 session.user.id = token.id;
                 session.user.name = token.name;
