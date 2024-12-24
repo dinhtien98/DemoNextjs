@@ -1,30 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import jwt from "jsonwebtoken";
+import { NextApiHandler } from "next";
 
 declare module "next-auth" {
-  interface User {
-    id: string;
-    userName?: string | null;
-    fullName?: string | null;
-    expires?: Date | null;
-  }
+    interface User {
+        fullName?: string;
+        token?: string;
+        id?: string;
+    }
+
+    interface Session {
+        token?: string;
+        id?: string;
+        user?: {
+            id?: string;
+            fullName?: string;
+        };
+    }
 }
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      token: any;
-      id: string;
-      userName?: string | null;
-      fullName?: string | null;
-      expires?: Date | null;
-    };
-  }
-}
-
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             name: "Credentials",
@@ -51,16 +46,16 @@ export const authOptions = {
                     }
 
                     const responseData = await res.json();
-                    const decoded = jwt.decode(responseData.data.token) as jwt.JwtPayload;
-                    if (!decoded) {
-                        console.error("Failed to decode token");
+                    console.log("responseData", responseData);
+                    if (!responseData || !responseData.data.token) {
+                        console.error("Failed to retrieve token");
                         return null;
                     }
+
                     return {
-                        id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-                        userName: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
-                        fullName: decoded['FullName'],
-                        token: responseData.data.token
+                        id: responseData.data.userId,
+                        token: responseData.data.token,
+                        fullName: responseData.data.fullName,
                     };
                 } catch (error) {
                     console.error("Error during authentication:", error);
@@ -70,28 +65,24 @@ export const authOptions = {
         }),
     ],
     session: {
-        strategy: "jwt" as const,
+        strategy: "jwt",
         maxAge: 30 * 24 * 60 * 60,
-        updateAge: 24 * 60 * 60,
     },
-    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-        async jwt({ token, user }: { token: any, user?: any }) {
+        async jwt({ token, user }) {
             if (user) {
-                token.sub = user.id;
-                token.userName = user.userName;
-                token.fullName = user.fullName;
+                token.id = user.id;
                 token.token = user.token;
+                token.fullName = user.fullName;
             }
             return token;
         },
-        async session({ session, token }: { session: any, token: any }) {
-            if (session.user) {
-                session.user.id = token.sub as string;
-                session.user.userName = token.userName as string | null | undefined;
-                session.user.fullName = token.fullName as string | null | undefined;
-                session.user.token = token.token;
-            }
+        async session({ session, token }) {
+            session.token = token.token as string;
+            session.user = {
+                id: token.id as string,
+                fullName: token.fullName as string,
+            };
             return session;
         },
     },
@@ -99,16 +90,31 @@ export const authOptions = {
         sessionToken: {
             name: `next-auth.session-token`,
             options: {
-                httpOnly: false,
-                secure: process.env.NODE_ENV === "production", 
-                sameSite: "Lax", 
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "Lax",
                 path: "/",
                 maxAge: 30 * 24 * 60 * 60,
             },
         },
     },
+    jwt: {
+        encode: async ({ token }) => {
+            if (token) {
+                return JSON.stringify(token);
+            }
+            throw new Error("Invalid token format for encoding.");
+        },
+        decode: async ({ token }) => {
+            if (!token) {
+                throw new Error("Token is undefined.");
+            }
+            return JSON.parse(token);
+        },
+    },
+    secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
+const handler: NextApiHandler = (req, res) => NextAuth(req, res, authOptions);
 
 export { handler as GET, handler as POST };

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { getCookie } from './get-Cookie';
+import { getCookie } from '../../components/get-Cookie';
 
 interface DataItem {
     id: string;
@@ -33,8 +33,10 @@ export default function Page() {
         try {
             const token = getCookie('next-auth.session-token'); 
             const resolvedToken = await token;
-            console.log('token', resolvedToken?.value);
-            if (!token) {
+            const decodedData = resolvedToken?.value ? decodeURIComponent(resolvedToken.value) : '';
+            const parsedData = JSON.parse(decodedData);
+            const res = parsedData.token;
+            if (!res) {
                 throw new Error('No token found in cookies');
             }
     
@@ -42,7 +44,7 @@ export default function Page() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${resolvedToken?.value}`, 
+                    'Authorization': `Bearer ${res}`, 
                 },
             });
     

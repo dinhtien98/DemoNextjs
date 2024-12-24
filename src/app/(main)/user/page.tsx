@@ -1,4 +1,5 @@
 'use client';
+import { getCookie } from '@/app/components/get-Cookie';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import React, { useEffect, useState } from 'react';
@@ -30,7 +31,21 @@ export default function Page() {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('http://localhost:5004/api/authUser');
+            const token = getCookie('next-auth.session-token');
+            const resolvedToken = await token;
+            const decodedData = resolvedToken?.value ? decodeURIComponent(resolvedToken.value) : '';
+            const parsedData = JSON.parse(decodedData);
+            const res = parsedData.token;
+            if (!res) {
+                throw new Error('No token found in cookies');
+            }
+            const response = await fetch('http://localhost:5004/api/authUser', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${res}`, 
+                },
+            });
             if (!response.ok) {
                 throw new Error('Failed to fetch data');
             }
