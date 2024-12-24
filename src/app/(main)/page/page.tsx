@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { getCookie } from './get-Cookie';
 
 interface DataItem {
     id: string;
@@ -22,15 +23,33 @@ interface DataItem {
     deletedflag: boolean;
 }
 
+
+
+
 export default function Page() {
     const [data, setData] = useState<DataItem[]>([]);
 
     const fetchData = async () => {
         try {
-            const response = await fetch('https://localhost:7223/api/authPage');
+            const token = getCookie('next-auth.session-token'); 
+            const resolvedToken = await token;
+            console.log('token', resolvedToken?.value);
+            if (!token) {
+                throw new Error('No token found in cookies');
+            }
+    
+            const response = await fetch('http://localhost:5004/api/authPage', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${resolvedToken?.value}`, 
+                },
+            });
+    
             if (!response.ok) {
                 throw new Error('Failed to fetch data');
             }
+    
             const result = await response.json();
             setData(result);
         } catch (error) {

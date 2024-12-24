@@ -5,6 +5,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import Link from 'next/link';
 import { Menubar } from 'primereact/menubar';
+import { signOut } from 'next-auth/react';
 
 interface CustomMenuItem {
   label: string;
@@ -36,6 +37,15 @@ export default function Header() {
     }
   ];
 
+  const handleSignOut = async () => {
+    try {
+      await signOut({ redirect: false });
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error during sign out:', error)
+    }
+  }
+  
   const start = <div>DEMO NEXTJS</div>;
 
   const end = (
@@ -44,8 +54,8 @@ export default function Header() {
       <Button type="button" className="p-link layout-topbar-button">
         <i className="pi pi-user"></i>
       </Button>
-      <Button type="button" className="p-link layout-topbar-button">
-        <i className="pi pi-cog"></i>
+      <Button type="button" className="p-link layout-topbar-button" onClick={handleSignOut}>
+        <i className="pi pi-sign-out"></i>
       </Button>
     </div>
   );

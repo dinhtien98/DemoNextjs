@@ -1,19 +1,19 @@
 import { getServerSession } from "next-auth";
-import { GET } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
 interface Session {
   user?: {
-    name?: string;
+    fullName?: string;
   };
 }
 
 export default async function Home() {
-  const sessions: Session | null = await getServerSession(GET);
+  const session: Session | null = await getServerSession(authOptions);
 
   return (
     <div>
-      {sessions ? (
-        <p>Signed in as {sessions?.user?.name}</p>
+      {session ? (
+        <p>Signed in as {session.user?.fullName}</p>
       ) : (
         <p>Not signed in</p>
       )}
