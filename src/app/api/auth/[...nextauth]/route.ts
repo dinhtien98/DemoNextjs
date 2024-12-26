@@ -15,6 +15,7 @@ declare module "next-auth" {
         user?: {
             id?: string;
             fullName?: string;
+            token?: string;
         };
     }
 }
@@ -81,6 +82,7 @@ export const authOptions: NextAuthOptions = {
             session.user = {
                 id: token.id as string,
                 fullName: token.fullName as string,
+                token: token.token as string,
             };
             return session;
         },
@@ -95,20 +97,6 @@ export const authOptions: NextAuthOptions = {
                 path: "/",
                 maxAge: 30 * 24 * 60 * 60,
             },
-        },
-    },
-    jwt: {
-        encode: async ({ token }) => {
-            if (token) {
-                return JSON.stringify(token);
-            }
-            throw new Error("Invalid token format for encoding.");
-        },
-        decode: async ({ token }) => {
-            if (!token) {
-                throw new Error("Token is undefined.");
-            }
-            return JSON.parse(token);
         },
     },
     secret: process.env.NEXTAUTH_SECRET,
