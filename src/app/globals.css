@@ -38,12 +38,7 @@ body {
   background-color: white; 
 }
 
-.p-password-input{
-  width: 100%;
-}
 .button-panel{
   justify-content: flex-end;
-}
-.main{
-  height: 120vh;
+  align-items: center;
 }
