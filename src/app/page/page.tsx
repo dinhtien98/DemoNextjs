@@ -1,13 +1,14 @@
 import { getServerSession, Session } from 'next-auth';
+import React from 'react'
 import { authOptions } from '../api/auth/[...nextauth]/route';
-import TableUser from './tableUser';
 import LoginPage from '../(auth)/login/page';
+import TablePage from './tablePage';
 
-export default async function pageUser() {
+export default async function page() {
     const session: Session | null = await getServerSession(authOptions);
     return (
         <div>
-            {session ?<TableUser session={session} /> : <LoginPage />}
+            {session ? <TablePage session={session} /> : <LoginPage />}
         </div>
     )
 }

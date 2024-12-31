@@ -111,3 +111,24 @@ export const deleteUser = async (token: string,id: any, data: any) => {
     throw error;
   }
 }
+
+export const postPage = async (token: string, data: any) => {
+
+  try {
+    const response = await fetch('http://localhost:5004/api/authPage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'Page created';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
