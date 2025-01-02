@@ -5,6 +5,9 @@ import { Button } from 'primereact/button';
 import Link from 'next/link';
 import { Menubar } from 'primereact/menubar';
 import { signOut } from 'next-auth/react';
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 
 
 export default function Header() {
@@ -17,7 +20,7 @@ export default function Header() {
     }
   }
 
-  const start = <Link href="/" passHref><div>DEMO NEXTJS</div></Link>;
+  const start = <Link href="/" passHref><div className='text-black hover:text-blue-900 font-bold text-xl'>DEMO NEXTJS</div></Link>;
 
   const end = (
     <div className="flex align-items-center gap-2">

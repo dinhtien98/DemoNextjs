@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react/jsx-no-duplicate-props */
@@ -8,7 +9,7 @@ import { Column } from 'primereact/column'
 import { DataTable } from 'primereact/datatable'
 import React, { useEffect, useState } from 'react'
 import { DataTableSelectionMultipleChangeEvent, DataTableSelectAllChangeEvent } from 'primereact/datatable';
-import { deleteUser, getRole, getUser, postUser } from '../components/fetchApi';
+import { deleteUser, getRole, getUser, postUser, putUser } from '../components/fetchApi';
 import { authOptions } from '../api/auth/[...nextauth]/route';
 import { Button } from 'primereact/button';
 import 'primereact/resources/themes/saga-blue/theme.css';
@@ -25,16 +26,16 @@ interface TableUser {
 
 interface User {
     id: number;
-    fullName: string;
-    email: string;
-    avatar: string;
     userName: string;
     password: string;
+    fullName: string;
+    email: string;
     firstLogin: number;
     inDate: string;
     outDate: string;
     failCount: number;
     isLocked: number;
+    avatar: string;
     lastLogin: Date;
     createdTime: Date;
     createdBy: string;
@@ -43,7 +44,7 @@ interface User {
     deletedTime: Date;
     deletedBy: string;
     deletedFlag: number;
-    roleCode: JSON[];
+    roleName: JSON[];
 }
 
 interface UserTmp {
@@ -81,6 +82,8 @@ export default function tableUser({ session: initialSession }: TableUser) {
     const [selectedCustomers, setSelectedCustomers] = useState<User[] | null>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [isEdit, setIsEdit] = useState<boolean>(false);
+    const [roles, setRoles] = useState<Role[] | null>(null);
+    const rolesProps = roles?.map((role) => ({ name: role.name, code: role.code }));
     const [selectedUserTmp, setSelectedUserTmp] = useState<UserTmp>({
         fullName: '',
         email: '',
@@ -102,8 +105,6 @@ export default function tableUser({ session: initialSession }: TableUser) {
         deletedFlag: 0,
         roleCode: []
     });
-    const [roles, setRoles] = useState<Role[] | null>(null);
-    const rolesProps = roles?.map((role) => ({ name: role.name, code: role.code }));
 
     async function fetch_Session() {
         const sessionData: Session | null = await getServerSession(authOptions);
@@ -162,6 +163,7 @@ export default function tableUser({ session: initialSession }: TableUser) {
             console.error('No users selected for deletion');
         }
     }
+
     useEffect(() => {
         if (!initialSession) {
             fetch_Session();
@@ -170,6 +172,58 @@ export default function tableUser({ session: initialSession }: TableUser) {
         get_Role();
     }, [])
 
+    useEffect(() => {
+        setData();
+    }, [selectedCustomers, isEdit])
+    
+    const setData = () => {
+        if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
+            const user = selectedCustomers[0];
+            setSelectedUserTmp({
+                fullName: user.fullName,
+                email: user.email,
+                avatar: user.avatar,
+                userName: user.userName,
+                password: '',
+                firstLogin: user.firstLogin,
+                inDate: user.inDate,
+                outDate: user.outDate,
+                failCount: user.failCount,
+                isLocked: user.isLocked,
+                lastLogin: new Date(),
+                createdTime: new Date(),
+                createdBy: '',
+                updatedTime: new Date(),
+                updatedBy: '',
+                deletedTime: new Date(),
+                deletedBy: '',
+                deletedFlag: 0,
+                roleCode: []
+            });
+        } else {
+            setSelectedUserTmp({
+                fullName: '',
+                email: '',
+                avatar: '',
+                userName: '',
+                password: '',
+                firstLogin: 0,
+                inDate: '',
+                outDate: '',
+                failCount: 0,
+                isLocked: 0,
+                lastLogin: new Date(),
+                createdTime: new Date(),
+                createdBy: '',
+                updatedTime: new Date(),
+                updatedBy: '',
+                deletedTime: new Date(),
+                deletedBy: '',
+                deletedFlag: 0,
+                roleCode: []
+            });
+        }
+    };
     const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<User[]>) => {
         const value = event.value;
         const totalRecords = users ? users.length : 0;
@@ -193,6 +247,25 @@ export default function tableUser({ session: initialSession }: TableUser) {
         try {
             if (session?.user?.token) {
                 const res = await postUser(session.user.token, selectedUserTmp);
+                if (res) {
+                    setVisible(false);
+                    get_User();
+                } else {
+                    console.error('Error fetching data:', res);
+                }
+            } else {
+                console.error('User token is undefined');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const handleUpdate = async () => {
+        const id = selectedCustomers ? selectedCustomers.map(user => user.id) : [];
+        try {
+            if (session?.user?.token) {
+                const res = await putUser(session.user.token, id, selectedUserTmp);
                 if (res) {
                     setVisible(false);
                     get_User();
@@ -236,19 +309,23 @@ export default function tableUser({ session: initialSession }: TableUser) {
             <div className='p-4 w-full md:w-5/6 bg-white shadow-lg rounded-lg'>
                 <div className='mb-4 flex gap-2'>
                     <div className='p-4 w-full md:w-4/6'>
-                        <Button onClick={() => setVisible(true)} icon="pi pi-plus" label="Add New User" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
-                        <Dialog header='Add New User' visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} className="custom-dialog">
+                        <Button onClick={() => (setVisible(true))} icon="pi pi-plus" label="Add New User" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
+                        <Dialog header={isEdit ? 'Update User' : 'Add New User'} visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} className="custom-dialog" closable={false}>
                             <Card className="md:w-25rem">
                                 <div className="card flex flex-wrap justify-content-center gap-4 p-4">
                                     <div className="p-inputgroup">
                                         <span className="p-inputgroup-addon mx-1">
                                             <i className="pi pi-user"></i>
                                         </span>
-                                        <InputText type="text" placeholder="UserName" tooltip="Enter your UserName" value={selectedUserTmp?.userName || ''} onChange={(e) => {
-                                            if (selectedUserTmp) {
-                                                setSelectedUserTmp({ ...selectedUserTmp, userName: e.target.value });
-                                            }
-                                        }} className="p-inputtext-lg" />
+                                        {!isEdit ? (
+                                            <InputText type="text" placeholder="UserName" tooltip="Enter your UserName" value={selectedUserTmp?.userName || ''} onChange={(e) => {
+                                                if (selectedUserTmp) {
+                                                    setSelectedUserTmp({ ...selectedUserTmp, userName: e.target.value });
+                                                }
+                                            }} className="p-inputtext-lg" />
+                                        ) : (
+                                            <div className="p-inputtext-lg">{selectedCustomers ? selectedCustomers.map(user => user.userName).join(', ') : ''}</div>
+                                        )}
                                     </div>
                                     <div className="p-inputgroup">
                                         <span className="p-inputgroup-addon mx-1">
@@ -299,7 +376,10 @@ export default function tableUser({ session: initialSession }: TableUser) {
                                             placeholder="Select Roles" maxSelectedLabels={3} className="w-full md:w-20rem p-multiselect-lg" tooltip="Choose Roles" />
                                     </div>
                                 </div>
-                                <Button className='w-full my-2 button-panel text-green-500 hover:text-green-700 p-button-lg' label="Save" onClick={handleAdd} />
+                                <div className='flex justify-content-center gap-4 p-4'>
+                                    <Button className='w-full my-2 button-panel text-red-500 hover:text-red-700 p-button-lg' label="Close" onClick={() => (setIsEdit(false), setVisible(false))} />
+                                    <Button className='w-full my-2 button-panel text-green-500 hover:text-green-700 p-button-lg' label="Save" onClick={() => { isEdit ? handleUpdate() : handleAdd(); setIsEdit(false); }} />
+                                </div>
                             </Card>
                         </Dialog>
                         {(selectedCustomers && selectedCustomers.length > 1) && (
@@ -307,9 +387,8 @@ export default function tableUser({ session: initialSession }: TableUser) {
                         )}
                         {selectedCustomers && selectedCustomers.length === 1 && (
                             <>
-                                <Button onClick={() => setIsEdit(!isEdit)} icon="pi pi-refresh" label="Update User" className="p-2 p-button-raised p-button-rounded p-button-warning text-yellow-400 hover:text-yellow-600" />
+                                <Button onClick={() => (setIsEdit(!isEdit), setVisible(true))} icon="pi pi-refresh" label="Update User" className="p-2 p-button-raised p-button-rounded p-button-warning text-yellow-400 hover:text-yellow-600" />
                                 <Button onClick={() => handleDelete()} icon="pi pi-minus" label="Delete User" className="p-2 p-button-raised p-button-rounded p-button-danger text-red-500 hover:text-red-700" />
-
                             </>
                         )}
                     </div>
@@ -333,29 +412,16 @@ export default function tableUser({ session: initialSession }: TableUser) {
                 <div>
                     <DataTable value={users || []} paginator rows={10} selectionMode="multiple"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        rowsPerPageOptions={[10, 25, 50]} dataKey="id"
-                        selection={selectedCustomers || []} onSelectionChange={onSelectionChange} selectAll={selectAll} onSelectAllChange={onSelectAllChange}
-                        rowClassName={(rowData) => rowData.deletedFlag === 1 ? 'bg-red-100' : rowData.deletedFlag === 0 ? 'bg-green-100' : ''}>
+                        rowsPerPageOptions={[10, 25, 50]} dataKey="id" totalRecords={users ? users.length : 0}
+                        selection={selectedCustomers || []} onSelectionChange={isEdit ? undefined : onSelectionChange} selectAll={selectAll} onSelectAllChange={isEdit ? undefined : onSelectAllChange}
+                        rowClassName={(rowData) => selectedCustomers?.some(user => user.id === rowData.id) ? 'bg-blue-100' : rowData.deletedFlag === 1 ? 'bg-red-50' : rowData.deletedFlag === 0 ? 'bg-green-50' : ''}>
                         <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                         {users && users.length > 0 && Object.keys(users[0]).map((key) => (
-                            ['fullName', 'email', 'avatar', 'roleCode', 'isLocked'].includes(key) ? (
-                                <Column key={key} field={key} header={key.charAt(0).toUpperCase() + key.slice(1)} body={(rowData) => (
-                                    isEdit && selectedCustomers && selectedCustomers.length === 1 && selectedCustomers[0].id === rowData.id ? (
-                                        <InputText value={rowData[key]} onChange={(e) => {
-                                            const updatedUserTmp = { ...selectedUserTmp, [key]: e.target.value };
-                                            setSelectedUserTmp(updatedUserTmp);
-                                        }} />
-                                    ) : (
-                                        rowData[key]
-                                    )
-                                )} style={{ minWidth: '4rem' }} />
-                            ) : (
-                                <Column key={key} field={key} header={key.charAt(0).toUpperCase() + key.slice(1)} sortable filter filterPlaceholder={`Search by ${key}`} style={{ minWidth: '4rem' }} />
-                            )
+                            <Column key={key} field={key} header={key.charAt(0).toUpperCase() + key.slice(1)} sortable filter filterPlaceholder={`Search by ${key}`} style={{ minWidth: '4rem' }} />
                         ))}
                     </DataTable>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

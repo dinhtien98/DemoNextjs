@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 import { getServerSession, Session } from 'next-auth';
 import React, { useEffect, useState } from 'react'
 import { authOptions } from '../api/auth/[...nextauth]/route';
-import { getPage, postPage } from '../components/fetchApi';
+import { deleteUser, getAction, getPage, getRole, postPage, putPage } from '../components/fetchApi';
 import { Button } from 'primereact/button';
 import { DataTable, DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -14,6 +15,8 @@ import 'primeicons/primeicons.css';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
 import { Card } from 'primereact/card';
+import { MultiSelect } from 'primereact/multiselect';
+import { MultiSelectChangeEvent } from 'primereact/multiselect';
 
 interface TablePage {
     session: Session;
@@ -61,6 +64,20 @@ interface PageTmp {
     fullName?: string;
     email?: string;
     avatar?: string;
+    roleCode: JSON[];
+    actionCode: JSON[]
+}
+
+interface Role {
+    id: number;
+    name: string;
+    code: string;
+}
+
+interface Action {
+    id: number;
+    name: string;
+    actionCode: string;
 }
 
 export default function tablePage({ session: initialSession }: TablePage) {
@@ -69,7 +86,12 @@ export default function tablePage({ session: initialSession }: TablePage) {
     const [visible, setVisible] = useState<boolean>(false);
     const [initialPages, setinitialPages] = useState<Pages[] | null>(null);
     const [selectAll, setSelectAll] = useState<boolean>(false);
+    const [isEdit, setIsEdit] = useState<boolean>(false);
     const [selectedCustomers, setSelectedCustomers] = useState<Pages[] | null>(null);
+    const [roles, setRoles] = useState<Role[] | null>(null);
+    const rolesProps = roles?.map((role) => ({ name: role.name, code: role.code }));
+    const [action, setAction] = useState<Action[] | null>(null);
+    const actionProps = action?.map((action) => ({ name: action.name, code: action.actionCode }));
     const [selectedPageTmp, setSelectedPageTmp] = useState<PageTmp>({
         code: '',
         name: '',
@@ -86,6 +108,8 @@ export default function tablePage({ session: initialSession }: TablePage) {
         deletedTime: new Date(),
         deletedBy: '',
         deletedFlag: 0,
+        roleCode: [],
+        actionCode: []
     });
 
 
@@ -100,6 +124,32 @@ export default function tablePage({ session: initialSession }: TablePage) {
                 const res = await getPage(session.user.token);
                 setPages(res);
                 setinitialPages(res);
+            } else {
+                console.error('User token is undefined');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const get_Role = async () => {
+        try {
+            if (session?.user?.token) {
+                const role = await getRole(session.user.token);
+                setRoles(role);
+            } else {
+                console.error('User token is undefined');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const get_Action = async () => {
+        try {
+            if (session?.user?.token) {
+                const action = await getAction(session.user.token);
+                setAction(action);
             } else {
                 console.error('User token is undefined');
             }
@@ -126,12 +176,109 @@ export default function tablePage({ session: initialSession }: TablePage) {
         }
     };
 
+    const handleUpdate = async () => {
+        const id = selectedCustomers ? selectedCustomers.map(user => user.id) : [];
+        try {
+            if (session?.user?.token) {
+                const res = await putPage(session.user.token, id, selectedPageTmp);
+                if (res) {
+                    setVisible(false);
+                    get_Page();
+                } else {
+                    console.error('Error fetching data:', res);
+                }
+            } else {
+                console.error('User token is undefined');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const handleDelete = async () => {
+        const ids = selectedCustomers ? selectedCustomers.map(page => page.id) : [];
+        if (ids.length > 0) {
+            try {
+                if (session?.user?.token) {
+                    for (const id of ids) {
+                        const res = await deleteUser(session.user.token, id, selectedPageTmp);
+                        if (res) {
+                            console.log('Deleted user with id:', id);
+                        } else {
+                            console.error('Error deleting user with id:', id, res);
+                        }
+                    }
+                    get_Page();
+                    setSelectedCustomers([]);
+                    setSelectAll(false);
+                } else {
+                    console.error('User token is undefined');
+                }
+            } catch (error) {
+                console.error('Error deleting users:', error);
+            }
+        } else {
+            console.error('No users selected for deletion');
+        }
+    }
+
     useEffect(() => {
         if (!initialSession) {
             fetch_Session();
         }
         get_Page();
+        get_Role();
+        get_Action();
     }, [])
+
+    useEffect(() => {
+        setData();
+    }, [selectedCustomers, isEdit])
+
+    const setData = () => {
+        if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
+            const page = selectedCustomers[0];
+            setSelectedPageTmp({
+                code: page.code,
+                name: page.name,
+                parentCode: page.parentCode,
+                level: page.level,
+                url: page.url,
+                hidden: page.hidden,
+                icon: page.icon,
+                sort: page.sort,
+                createdTime: new Date(),
+                createdBy: '',
+                updatedTime: new Date(),
+                updatedBy: '',
+                deletedTime: new Date(),
+                deletedBy: '',
+                deletedFlag: 0,
+                roleCode: [],
+                actionCode: []
+            });
+        } else {
+            setSelectedPageTmp({
+                code: '',
+                name: '',
+                parentCode: '',
+                level: 0,
+                url: '',
+                hidden: 0,
+                icon: '',
+                sort: 0,
+                createdTime: new Date(),
+                createdBy: '',
+                updatedTime: new Date(),
+                updatedBy: '',
+                deletedTime: new Date(),
+                deletedBy: '',
+                deletedFlag: 0,
+                roleCode: [],
+                actionCode: []
+            });
+        }
+    };
 
     const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<Pages[]>) => {
         const value = event.value;
@@ -151,6 +298,8 @@ export default function tablePage({ session: initialSession }: TablePage) {
             setSelectedCustomers([]);
         }
     };
+
+
     return (
         <div className='p-4 m-4 flex flex-col md:flex-row gap-4'>
             <div className='p-4 w-full md:w-1/6 bg-white shadow-lg rounded-lg'>
@@ -181,26 +330,29 @@ export default function tablePage({ session: initialSession }: TablePage) {
                 <div className='mb-4 flex gap-2'>
                     <div className="p-4 w-full md:w-4/6">
                         <Button onClick={() => setVisible(true)} icon="pi pi-plus" label="Add New Page" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
-                        <Dialog header='Add New Page' visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} className="custom-dialog">
+                        <Dialog header={isEdit ? 'Update Page' : 'Add New Page'} visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} className="custom-dialog" closable={false}>
                             <Card className="md:w-25rem">
                                 <div className="card flex flex-wrap justify-content-center gap-4 p-4" style={{ background: "#f9f9f9", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
                                     <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
                                         <span className="p-inputgroup-addon">
                                             <i className="pi pi-key"></i>
                                         </span>
-                                        <InputText
-                                            type="text"
-                                            placeholder="Page Code"
-                                            tooltip="Enter your Page Code"
-                                            value={selectedPageTmp?.code || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, code: e.target.value });
-                                                }
-                                            }}
-                                            className="p-inputtext-lg mx-1"
-                                            style={{ borderRadius: "0 5px 5px 0" }}
-                                        />
+                                        {!isEdit ? (
+                                            <InputText
+                                                type="text"
+                                                placeholder="Page Code"
+                                                tooltip="Enter your Page Code"
+                                                value={selectedPageTmp?.code || ''}
+                                                onChange={(e) => {
+                                                    if (selectedPageTmp) {
+                                                        setSelectedPageTmp({ ...selectedPageTmp, code: e.target.value });
+                                                    }
+                                                }}
+                                                className="p-inputtext-lg mx-1"
+                                                style={{ borderRadius: "0 5px 5px 0" }}
+                                            />) : (
+                                            <div className="p-inputtext-lg">{selectedCustomers ? selectedCustomers.map(page => page.code).join(', ') : ''}</div>
+                                        )}
                                     </div>
 
                                     <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
@@ -297,9 +449,27 @@ export default function tablePage({ session: initialSession }: TablePage) {
                                             style={{ borderRadius: "0 5px 5px 0" }}
                                         />
                                     </div>
+                                    <div className="card flex justify-content-center w-full">
+                                        <MultiSelect value={selectedPageTmp?.roleCode} onChange={(e: MultiSelectChangeEvent) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, roleCode: e.value });
+                                            }
+                                        }} options={rolesProps} optionLabel="name"
+                                            placeholder="Select Roles" maxSelectedLabels={3} className="w-full md:w-20rem p-multiselect-lg" tooltip="Choose Roles" />
+                                    </div>
+                                    <div className="card flex justify-content-center w-full">
+                                        <MultiSelect value={selectedPageTmp?.actionCode} onChange={(e: MultiSelectChangeEvent) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, actionCode: e.value });
+                                            }
+                                        }} options={actionProps} optionLabel="name"
+                                            placeholder="Select Action" maxSelectedLabels={3} className="w-full md:w-20rem p-multiselect-lg" tooltip="Choose Action" />
+                                    </div>
                                 </div>
-
-                                <Button className='w-full my-2 button-panel text-green-500 hover:text-green-700 p-button-lg' label="Save" onClick={handleAdd} />
+                                <div className='flex justify-content-center gap-4 p-4'>
+                                    <Button className='w-full my-2 button-panel text-red-500 hover:text-red-700 p-button-lg' label="Close" onClick={() => (setIsEdit(false), setVisible(false))} />
+                                    <Button className='w-full my-2 button-panel text-green-500 hover:text-green-700 p-button-lg' label="Save" onClick={() => { isEdit ? handleUpdate() : handleAdd(); setIsEdit(false); }} />
+                                </div>
                             </Card>
                         </Dialog>
                         {(selectedCustomers && selectedCustomers.length > 1) && (
@@ -307,8 +477,8 @@ export default function tablePage({ session: initialSession }: TablePage) {
                         )}
                         {selectedCustomers && selectedCustomers.length === 1 && (
                             <>
-                                <Button icon="pi pi-refresh" label="Update Page" className="p-2 p-button-raised p-button-rounded p-button-warning text-yellow-400 hover:text-yellow-600" />
-                                <Button icon="pi pi-minus" label="Delete Page" className="p-2 p-button-raised p-button-rounded p-button-danger text-red-500 hover:text-red-700" />
+                                <Button onClick={() => (setIsEdit(!isEdit), setVisible(true))} icon="pi pi-refresh" label="Update Page" className="p-2 p-button-raised p-button-rounded p-button-warning text-yellow-400 hover:text-yellow-600" />
+                                <Button onClick={() => handleDelete()} icon="pi pi-minus" label="Delete Page" className="p-2 p-button-raised p-button-rounded p-button-danger text-red-500 hover:text-red-700" />
                             </>
                         )}
                     </div>
@@ -333,8 +503,8 @@ export default function tablePage({ session: initialSession }: TablePage) {
                     <DataTable value={pages || []} paginator rows={10} selectionMode="multiple"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         rowsPerPageOptions={[10, 25, 50]} dataKey="id"
-                        selection={selectedCustomers || []} onSelectionChange={onSelectionChange} selectAll={selectAll} onSelectAllChange={onSelectAllChange}
-                        rowClassName={(rowData) => rowData.deletedFlag === 1 ? 'bg-red-100' : rowData.deletedFlag === 0 ? 'bg-green-100' : ''}>
+                        selection={selectedCustomers || []} onSelectionChange={isEdit ? undefined : onSelectionChange} selectAll={selectAll} onSelectAllChange={isEdit ? undefined : onSelectAllChange}
+                        rowClassName={(rowData) => selectedCustomers?.some(pages => pages.id === rowData.id) ? 'bg-blue-100' : rowData.deletedFlag === 1 ? 'bg-red-50' : rowData.deletedFlag === 0 ? 'bg-green-50' : ''}>
                         <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                         {pages && pages.length > 0 && Object.keys(pages[0]).map((key) => (
                             <Column key={key} field={key} header={key.charAt(0).toUpperCase() + key.slice(1)} sortable filter filterPlaceholder={`Search by ${key}`} style={{ minWidth: '14rem' }} />

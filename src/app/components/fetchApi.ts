@@ -24,52 +24,6 @@ export const getUser = async (token: string) => {
   }
 };
 
-export const getPage = async (token: string) => {
-
-  try {
-    const response = await fetch('http://localhost:5004/api/authPage', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch data');
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    throw error;
-  }
-};
-
-export const getRole = async (token: string) => {
-
-  try {
-    const response = await fetch('http://localhost:5004/api/authRole', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch data');
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    throw error;
-  }
-};
-
 export const postUser = async (token: string, data: any) => {
 
   try {
@@ -112,6 +66,50 @@ export const deleteUser = async (token: string,id: any, data: any) => {
   }
 }
 
+export const putUser = async (token: string,id: any, data: any) => {
+
+  try {
+    const response = await fetch(`http://localhost:5004/api/authUser/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'User Updated';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export const getPage = async (token: string) => {
+
+  try {
+    const response = await fetch('http://localhost:5004/api/authPage', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
 export const postPage = async (token: string, data: any) => {
 
   try {
@@ -132,3 +130,91 @@ export const postPage = async (token: string, data: any) => {
     throw error;
   }
 }
+
+export const deletePage = async (token: string,id: any, data: any) => {
+
+  try {
+    const response = await fetch(`http://localhost:5004/api/authPage?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'Page deleted';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export const putPage = async (token: string,id: any, data: any) => {
+
+  try {
+    const response = await fetch(`http://localhost:5004/api/authPage/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'Page Updated';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export const getRole = async (token: string) => {
+
+  try {
+    const response = await fetch('http://localhost:5004/api/authRole', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+export const getAction = async (token: string) => {
+
+  try {
+    const response = await fetch('http://localhost:5004/api/AuthAction', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
