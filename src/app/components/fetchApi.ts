@@ -196,6 +196,69 @@ export const getRole = async (token: string) => {
   }
 };
 
+export const postRole = async (token: string, data: any) => {
+
+  try {
+    const response = await fetch('http://localhost:5004/api/authRole', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'Page created';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export const deleteRole = async (token: string,id: any, data: any) => {
+
+  try {
+    const response = await fetch(`http://localhost:5004/api/authRole?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'Page deleted';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export const putRole = async (token: string,id: any, data: any) => {
+
+  try {
+    const response = await fetch(`http://localhost:5004/api/authRole/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    return 'Page Updated';
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
 export const getAction = async (token: string) => {
 
   try {

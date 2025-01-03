@@ -175,7 +175,7 @@ export default function tableUser({ session: initialSession }: TableUser) {
     useEffect(() => {
         setData();
     }, [selectedCustomers, isEdit])
-    
+
     const setData = () => {
         if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
             const user = selectedCustomers[0];
@@ -224,6 +224,7 @@ export default function tableUser({ session: initialSession }: TableUser) {
             });
         }
     };
+    
     const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<User[]>) => {
         const value = event.value;
         const totalRecords = users ? users.length : 0;

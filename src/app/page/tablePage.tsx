@@ -5,7 +5,7 @@
 import { getServerSession, Session } from 'next-auth';
 import React, { useEffect, useState } from 'react'
 import { authOptions } from '../api/auth/[...nextauth]/route';
-import { deleteUser, getAction, getPage, getRole, postPage, putPage } from '../components/fetchApi';
+import { deletePage, getAction, getPage, getRole, postPage, putPage } from '../components/fetchApi';
 import { Button } from 'primereact/button';
 import { DataTable, DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -201,7 +201,7 @@ export default function tablePage({ session: initialSession }: TablePage) {
             try {
                 if (session?.user?.token) {
                     for (const id of ids) {
-                        const res = await deleteUser(session.user.token, id, selectedPageTmp);
+                        const res = await deletePage(session.user.token, id, selectedPageTmp);
                         if (res) {
                             console.log('Deleted user with id:', id);
                         } else {
