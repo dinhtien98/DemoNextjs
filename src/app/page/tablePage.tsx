@@ -2,303 +2,40 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
-import { getServerSession, Session } from 'next-auth';
-import React, { useEffect, useState } from 'react'
-import { authOptions } from '../api/auth/[...nextauth]/route';
-import { deletePage, getAction, getPage, getRole, postPage, putPage } from '../components/fetchApi';
+import React from 'react'
 import { Button } from 'primereact/button';
-import { DataTable, DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } from 'primereact/datatable';
+import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
 import { InputText } from 'primereact/inputtext';
 import { Dialog } from 'primereact/dialog';
-import { Card } from 'primereact/card';
 import { MultiSelect } from 'primereact/multiselect';
 import { MultiSelectChangeEvent } from 'primereact/multiselect';
+import { usePages } from '@/hooks/usePages';
 
-interface TablePage {
-    session: Session;
-}
-
-interface Pages {
-    id: string;
-    code: string;
-    name: string;
-    parentCode: string;
-    level: number;
-    url: string;
-    hidden: number;
-    icon: string;
-    sort: number;
-    createdTime: Date;
-    createdBy: string;
-    updatedTime: Date;
-    updatedBy: string;
-    deletedTime: Date;
-    deletedBy: string;
-    deletedFlag: number;
-    roleName: JSON[];
-    actionName: JSON[]
-}
-
-interface PageTmp {
-    code: string;
-    name: string;
-    parentCode: string;
-    level: number;
-    url: string;
-    hidden: number;
-    icon: string;
-    sort: number;
-    createdTime: Date;
-    createdBy: string;
-    updatedTime: Date;
-    updatedBy: string;
-    deletedTime: Date;
-    deletedBy: string;
-    deletedFlag: number;
-    userName?: string;
-    password?: string;
-    fullName?: string;
-    email?: string;
-    avatar?: string;
-    roleCode: JSON[];
-    actionCode: JSON[]
-}
-
-interface Role {
-    id: number;
-    name: string;
-    code: string;
-}
-
-interface Action {
-    id: number;
-    name: string;
-    actionCode: string;
-}
 
 export default function tablePage({ session: initialSession }: TablePage) {
-    const [session, setSession] = useState<Session | null>(initialSession);
-    const [pages, setPages] = useState<Pages[] | null>(null);
-    const [visible, setVisible] = useState<boolean>(false);
-    const [initialPages, setinitialPages] = useState<Pages[] | null>(null);
-    const [selectAll, setSelectAll] = useState<boolean>(false);
-    const [isEdit, setIsEdit] = useState<boolean>(false);
-    const [selectedCustomers, setSelectedCustomers] = useState<Pages[] | null>(null);
-    const [roles, setRoles] = useState<Role[] | null>(null);
-    const rolesProps = roles?.map((role) => ({ name: role.name, code: role.code }));
-    const [action, setAction] = useState<Action[] | null>(null);
-    const actionProps = action?.map((action) => ({ name: action.name, code: action.actionCode }));
-    const [selectedPageTmp, setSelectedPageTmp] = useState<PageTmp>({
-        code: '',
-        name: '',
-        parentCode: '',
-        level: 0,
-        url: '',
-        hidden: 0,
-        icon: '',
-        sort: 0,
-        createdTime: new Date(),
-        createdBy: '',
-        updatedTime: new Date(),
-        updatedBy: '',
-        deletedTime: new Date(),
-        deletedBy: '',
-        deletedFlag: 0,
-        roleCode: [],
-        actionCode: []
-    });
-
-
-    async function fetch_Session() {
-        const sessionData: Session | null = await getServerSession(authOptions);
-        setSession(sessionData);
-    }
-
-    const get_Page = async () => {
-        try {
-            if (session?.user?.token) {
-                const res = await getPage(session.user.token);
-                setPages(res);
-                setinitialPages(res);
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const get_Role = async () => {
-        try {
-            if (session?.user?.token) {
-                const role = await getRole(session.user.token);
-                setRoles(role);
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const get_Action = async () => {
-        try {
-            if (session?.user?.token) {
-                const action = await getAction(session.user.token);
-                setAction(action);
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const handleAdd = async () => {
-        try {
-            if (session?.user?.token) {
-                const res = await postPage(session.user.token, selectedPageTmp);
-                if (res) {
-                    setVisible(false);
-                    get_Page();
-                } else {
-                    console.error('Error fetching data:', res);
-                }
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const handleUpdate = async () => {
-        const id = selectedCustomers ? selectedCustomers.map(user => user.id) : [];
-        try {
-            if (session?.user?.token) {
-                const res = await putPage(session.user.token, id, selectedPageTmp);
-                if (res) {
-                    setVisible(false);
-                    get_Page();
-                } else {
-                    console.error('Error fetching data:', res);
-                }
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const handleDelete = async () => {
-        const ids = selectedCustomers ? selectedCustomers.map(page => page.id) : [];
-        if (ids.length > 0) {
-            try {
-                if (session?.user?.token) {
-                    for (const id of ids) {
-                        const res = await deletePage(session.user.token, id, selectedPageTmp);
-                        if (res) {
-                            console.log('Deleted user with id:', id);
-                        } else {
-                            console.error('Error deleting user with id:', id, res);
-                        }
-                    }
-                    get_Page();
-                    setSelectedCustomers([]);
-                    setSelectAll(false);
-                } else {
-                    console.error('User token is undefined');
-                }
-            } catch (error) {
-                console.error('Error deleting users:', error);
-            }
-        } else {
-            console.error('No users selected for deletion');
-        }
-    }
-
-    useEffect(() => {
-        if (!initialSession) {
-            fetch_Session();
-        }
-        get_Page();
-        get_Role();
-        get_Action();
-    }, [])
-
-    useEffect(() => {
-        setData();
-    }, [selectedCustomers, isEdit])
-
-    const setData = () => {
-        if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
-            const page = selectedCustomers[0];
-            setSelectedPageTmp({
-                code: page.code,
-                name: page.name,
-                parentCode: page.parentCode,
-                level: page.level,
-                url: page.url,
-                hidden: page.hidden,
-                icon: page.icon,
-                sort: page.sort,
-                createdTime: new Date(),
-                createdBy: '',
-                updatedTime: new Date(),
-                updatedBy: '',
-                deletedTime: new Date(),
-                deletedBy: '',
-                deletedFlag: 0,
-                roleCode: [],
-                actionCode: []
-            });
-        } else {
-            setSelectedPageTmp({
-                code: '',
-                name: '',
-                parentCode: '',
-                level: 0,
-                url: '',
-                hidden: 0,
-                icon: '',
-                sort: 0,
-                createdTime: new Date(),
-                createdBy: '',
-                updatedTime: new Date(),
-                updatedBy: '',
-                deletedTime: new Date(),
-                deletedBy: '',
-                deletedFlag: 0,
-                roleCode: [],
-                actionCode: []
-            });
-        }
-    };
-
-    const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<Pages[]>) => {
-        const value = event.value;
-        const totalRecords = pages ? pages.length : 0;
-
-        setSelectedCustomers(value as unknown as Pages[]);
-        setSelectAll((value as unknown as Pages[]).length === totalRecords);
-    };
-    const onSelectAllChange = (event: DataTableSelectAllChangeEvent) => {
-        const selectAll = event.checked;
-
-        if (selectAll && pages) {
-            setSelectAll(true);
-            setSelectedCustomers(pages);
-        } else {
-            setSelectAll(false);
-            setSelectedCustomers([]);
-        }
-    };
-
+    const {
+        pages,
+        selectedCustomers,
+        roles,
+        actions,
+        selectedPageTmp,
+        setSelectedPageTmp,
+        visible,
+        setVisible,
+        isEdit,
+        setIsEdit,
+        selectAll,
+        handleDelete,
+        handleAdd,
+        handleUpdate,
+        onSelectionChange,
+        onSelectAllChange,
+        setSearchValue,
+        searchValue,
+    } = usePages(initialSession);
+    const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
+    const actionProps = actions?.map((action) => ({ name: action.name, code: action.actionCode }));
 
     return (
         <div className='p-4 m-4 flex flex-col md:flex-row gap-4'>
@@ -330,147 +67,179 @@ export default function tablePage({ session: initialSession }: TablePage) {
                 <div className='mb-4 flex gap-2'>
                     <div className="p-4 w-full md:w-4/6">
                         <Button onClick={() => setVisible(true)} icon="pi pi-plus" label="Add New Page" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
-                        <Dialog header={isEdit ? 'Update Page' : 'Add New Page'} visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} className="custom-dialog" closable={false}>
-                            <Card className="md:w-25rem">
-                                <div className="card flex flex-wrap justify-content-center gap-4 p-4" style={{ background: "#f9f9f9", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}>
-                                    <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
-                                        <span className="p-inputgroup-addon">
-                                            <i className="pi pi-key"></i>
-                                        </span>
-                                        {!isEdit ? (
-                                            <InputText
-                                                type="text"
-                                                placeholder="Page Code"
-                                                tooltip="Enter your Page Code"
-                                                value={selectedPageTmp?.code || ''}
-                                                onChange={(e) => {
-                                                    if (selectedPageTmp) {
-                                                        setSelectedPageTmp({ ...selectedPageTmp, code: e.target.value });
-                                                    }
-                                                }}
-                                                className="p-inputtext-lg mx-1"
-                                                style={{ borderRadius: "0 5px 5px 0" }}
-                                            />) : (
-                                            <div className="p-inputtext-lg">{selectedCustomers ? selectedCustomers.map(page => page.code).join(', ') : ''}</div>
-                                        )}
-                                    </div>
-
-                                    <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
-                                        <span className="p-inputgroup-addon">
-                                            <i className="pi pi-tag"></i>
-                                        </span>
+                        <Dialog
+                            header={isEdit ? "Update Page" : "Add New Page"}
+                            visible={visible}
+                            style={{ width: '450px' }}
+                            onHide={() => {
+                                if (!visible) return;
+                                setVisible(false);
+                            }}
+                            className="p-dialog-default"
+                            closable={false}
+                        >
+                            <div className="p-dialog-content">
+                                <div className="field">
+                                    <label htmlFor="pageCode">Page Code</label>
+                                    {!isEdit ? (
                                         <InputText
+                                            id="pageCode"
                                             type="text"
-                                            placeholder="Page Name"
-                                            tooltip="Enter your Page Name"
-                                            value={selectedPageTmp?.name || ''}
+                                            tooltip="Enter your Page Code"
+                                            value={selectedPageTmp?.code || ''}
                                             onChange={(e) => {
                                                 if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, name: e.target.value });
+                                                    setSelectedPageTmp({ ...selectedPageTmp, code: e.target.value });
                                                 }
                                             }}
-                                            className="p-inputtext-lg mx-1"
-                                            style={{ borderRadius: "0 5px 5px 0" }}
+                                            className="p-inputtext p-inputtext-lg"
                                         />
-                                    </div>
+                                    ) : (
+                                        <div className="p-inputtext-lg">
+                                            {selectedCustomers ? selectedCustomers.map(page => page.code).join(', ') : ''}
+                                        </div>
+                                    )}
+                                </div>
 
-                                    <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
-                                        <span className="p-inputgroup-addon">
-                                            <i className="pi pi-folder"></i>
-                                        </span>
-                                        <InputText
-                                            type="text"
-                                            placeholder="Page Parent Code"
-                                            tooltip="Enter your Page Parent Code"
-                                            value={selectedPageTmp?.parentCode || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, parentCode: e.target.value });
-                                                }
-                                            }}
-                                            className="p-inputtext-lg mx-1"
-                                            style={{ borderRadius: "0 5px 5px 0" }}
-                                        />
-                                    </div>
+                                <div className="field">
+                                    <label htmlFor="pageName">Page Name</label>
+                                    <InputText
+                                        id="pageName"
+                                        type="text"
+                                        tooltip="Enter your Page Name"
+                                        value={selectedPageTmp?.name || ''}
+                                        onChange={(e) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, name: e.target.value });
+                                            }
+                                        }}
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
 
-                                    <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
-                                        <span className="p-inputgroup-addon">
-                                            <i className="pi pi-sitemap"></i>
-                                        </span>
-                                        <InputText
-                                            type="number"
-                                            placeholder="Page Level"
-                                            tooltip="Enter your Page Level"
-                                            value={selectedPageTmp?.level?.toString() || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, level: parseInt(e.target.value) });
-                                                }
-                                            }}
-                                            className="p-inputtext-lg mx-1"
-                                            style={{ borderRadius: "0 5px 5px 0" }}
-                                        />
-                                    </div>
+                                <div className="field">
+                                    <label htmlFor="pageParentCode">Page Parent Code</label>
+                                    <InputText
+                                        id="pageParentCode"
+                                        type="text"
+                                        tooltip="Enter your Page Parent Code"
+                                        value={selectedPageTmp?.parentCode || ''}
+                                        onChange={(e) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, parentCode: e.target.value });
+                                            }
+                                        }}
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
 
-                                    <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
-                                        <span className="p-inputgroup-addon">
-                                            <i className="pi pi-link"></i>
-                                        </span>
-                                        <InputText
-                                            type="text"
-                                            placeholder="Page URL"
-                                            tooltip="Enter your Page URL"
-                                            value={selectedPageTmp?.url || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, url: e.target.value });
-                                                }
-                                            }}
-                                            className="p-inputtext-lg mx-1"
-                                            style={{ borderRadius: "0 5px 5px 0" }}
-                                        />
-                                    </div>
+                                <div className="field">
+                                    <label htmlFor="pageLevel">Page Level</label>
+                                    <InputText
+                                        id="pageLevel"
+                                        type="number"
+                                        tooltip="Enter your Page Level"
+                                        value={selectedPageTmp?.level?.toString() || ''}
+                                        onChange={(e) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, level: parseInt(e.target.value) });
+                                            }
+                                        }}
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
 
-                                    <div className="p-inputgroup" style={{ width: "100%", maxWidth: "400px" }}>
-                                        <span className="p-inputgroup-addon">
-                                            <i className="pi pi-star"></i>
-                                        </span>
-                                        <InputText
-                                            type="text"
-                                            placeholder="Page Icon"
-                                            tooltip="Enter your Page Icon"
-                                            value={selectedPageTmp?.icon || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, icon: e.target.value });
-                                                }
-                                            }}
-                                            className="p-inputtext-lg mx-1"
-                                            style={{ borderRadius: "0 5px 5px 0" }}
-                                        />
-                                    </div>
-                                    <div className="card flex justify-content-center w-full">
-                                        <MultiSelect value={selectedPageTmp?.roleCode} onChange={(e: MultiSelectChangeEvent) => {
+                                <div className="field">
+                                    <label htmlFor="pageURL">Page URL</label>
+                                    <InputText
+                                        id="pageURL"
+                                        type="text"
+                                        tooltip="Enter your Page URL"
+                                        value={selectedPageTmp?.url || ''}
+                                        onChange={(e) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, url: e.target.value });
+                                            }
+                                        }}
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
+
+                                <div className="field">
+                                    <label htmlFor="pageIcon">Page Icon</label>
+                                    <InputText
+                                        id="pageIcon"
+                                        type="text"
+                                        tooltip="Enter your Page Icon"
+                                        value={selectedPageTmp?.icon || ''}
+                                        onChange={(e) => {
+                                            if (selectedPageTmp) {
+                                                setSelectedPageTmp({ ...selectedPageTmp, icon: e.target.value });
+                                            }
+                                        }}
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
+
+                                <div className="field">
+                                    <label htmlFor="roles">Roles</label>
+                                    <MultiSelect
+                                        id="roles"
+                                        value={selectedPageTmp?.roleCode}
+                                        onChange={(e: MultiSelectChangeEvent) => {
                                             if (selectedPageTmp) {
                                                 setSelectedPageTmp({ ...selectedPageTmp, roleCode: e.value });
                                             }
-                                        }} options={rolesProps} optionLabel="name"
-                                            placeholder="Select Roles" maxSelectedLabels={3} className="w-full md:w-20rem p-multiselect-lg" tooltip="Choose Roles" />
-                                    </div>
-                                    <div className="card flex justify-content-center w-full">
-                                        <MultiSelect value={selectedPageTmp?.actionCode} onChange={(e: MultiSelectChangeEvent) => {
+                                        }}
+                                        options={rolesProps}
+                                        optionLabel="name"
+                                        placeholder="Select Roles"
+                                        maxSelectedLabels={3}
+                                        className="p-multiselect-lg"
+                                        tooltip="Choose Roles"
+                                    />
+                                </div>
+
+                                <div className="field">
+                                    <label htmlFor="actions">Actions</label>
+                                    <MultiSelect
+                                        id="actions"
+                                        value={selectedPageTmp?.actionCode}
+                                        onChange={(e: MultiSelectChangeEvent) => {
                                             if (selectedPageTmp) {
                                                 setSelectedPageTmp({ ...selectedPageTmp, actionCode: e.value });
                                             }
-                                        }} options={actionProps} optionLabel="name"
-                                            placeholder="Select Action" maxSelectedLabels={3} className="w-full md:w-20rem p-multiselect-lg" tooltip="Choose Action" />
-                                    </div>
+                                        }}
+                                        options={actionProps}
+                                        optionLabel="name"
+                                        placeholder="Select Actions"
+                                        maxSelectedLabels={3}
+                                        className="p-multiselect-lg"
+                                        tooltip="Choose Actions"
+                                    />
                                 </div>
-                                <div className='flex justify-content-center gap-4 p-4'>
-                                    <Button className='w-full my-2 button-panel text-red-500 hover:text-red-700 p-button-lg' label="Close" onClick={() => (setIsEdit(false), setVisible(false))} />
-                                    <Button className='w-full my-2 button-panel text-green-500 hover:text-green-700 p-button-lg' label="Save" onClick={() => { isEdit ? handleUpdate() : handleAdd(); setIsEdit(false); }} />
-                                </div>
-                            </Card>
+                            </div>
+
+                            <div className="p-dialog-footer">
+                                <Button
+                                    className="p-button-text text-red-500"
+                                    label="Cancel"
+                                    icon="pi pi-times"
+                                    onClick={() => {
+                                        setIsEdit(false);
+                                        setVisible(false);
+                                    }}
+                                />
+                                <Button
+                                    className="p-button-text text-green-500"
+                                    label="Save"
+                                    icon="pi pi-check"
+                                    onClick={() => {
+                                        isEdit ? handleUpdate() : handleAdd();
+                                        setIsEdit(false);
+                                    }}
+                                />
+                            </div>
                         </Dialog>
                         {(selectedCustomers && selectedCustomers.length > 1) && (
                             <Button icon="pi pi-minus" label="Delete Page" className="p-2 p-button-raised p-button-rounded p-button-danger text-red-500 hover:text-red-700" />
@@ -487,15 +256,12 @@ export default function tablePage({ session: initialSession }: TablePage) {
                             <span className="p-inputgroup-addon bg-blue-500 text-white rounded-l-md">
                                 <i className="pi pi-search"></i>
                             </span>
-                            <InputText className='border border-0.7 border-solid' placeholder="Search..." onChange={(e) => {
-                                const searchValue = e.target.value.toLowerCase();
-                                const filteredPages = initialPages?.filter(page =>
-                                    Object.values(page).some(value =>
-                                        value && value.toString().toLowerCase().includes(searchValue)
-                                    )
-                                );
-                                setPages(filteredPages || initialPages);
-                            }} />
+                            <InputText
+                                className="border border-0.7 border-solid"
+                                placeholder="Search..."
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                            />
                         </div>
                     </div>
                 </div>

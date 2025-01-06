@@ -5,6 +5,11 @@ import Footer from "@/components/footer";
 import { PrimeReactProvider } from 'primereact/api';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import 'primeicons/primeicons.css';
+import "primereact/resources/primereact.css";
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';
 import Providers from './components/providers';
 import Header from "@/components/header";
 

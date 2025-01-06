@@ -1,285 +1,38 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
-/* eslint-disable react/jsx-no-duplicate-props */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client';
-import { getServerSession, Session } from 'next-auth';
 import { Column } from 'primereact/column'
 import { DataTable } from 'primereact/datatable'
-import React, { useEffect, useState } from 'react'
-import { DataTableSelectionMultipleChangeEvent, DataTableSelectAllChangeEvent } from 'primereact/datatable';
-import { deleteUser, getRole, getUser, postUser, putUser } from '../components/fetchApi';
-import { authOptions } from '../api/auth/[...nextauth]/route';
+import React from 'react'
 import { Button } from 'primereact/button';
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
 import { Dialog } from 'primereact/dialog';
-import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { MultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
+import { useUsers } from '@/hooks/useUsers';
 
-interface TableUser {
-    session: Session;
-}
 
-interface User {
-    id: number;
-    userName: string;
-    password: string;
-    fullName: string;
-    email: string;
-    firstLogin: number;
-    inDate: string;
-    outDate: string;
-    failCount: number;
-    isLocked: number;
-    avatar: string;
-    lastLogin: Date;
-    createdTime: Date;
-    createdBy: string;
-    updatedTime: Date;
-    updatedBy: string;
-    deletedTime: Date;
-    deletedBy: string;
-    deletedFlag: number;
-    roleName: JSON[];
-}
-
-interface UserTmp {
-    fullName: string;
-    email: string;
-    avatar: string;
-    userName: string;
-    password: string;
-    firstLogin: number;
-    inDate: string;
-    outDate: string;
-    failCount: number;
-    isLocked: number;
-    lastLogin: Date;
-    createdTime: Date;
-    createdBy: string;
-    updatedTime: Date;
-    updatedBy: string;
-    deletedTime: Date;
-    deletedBy: string;
-    deletedFlag: number;
-    roleCode: JSON[];
-}
-
-interface Role {
-    id: number;
-    name: string;
-    code: string;
-}
 export default function tableUser({ session: initialSession }: TableUser) {
-    const [session, setSession] = useState<Session | null>(initialSession);
-    const [users, setUsers] = useState<User[] | null>(null);
-    const [initialUsers, setinitialUsers] = useState<User[] | null>(null);
-    const [selectAll, setSelectAll] = useState<boolean>(false);
-    const [selectedCustomers, setSelectedCustomers] = useState<User[] | null>(null);
-    const [visible, setVisible] = useState<boolean>(false);
-    const [isEdit, setIsEdit] = useState<boolean>(false);
-    const [roles, setRoles] = useState<Role[] | null>(null);
-    const rolesProps = roles?.map((role) => ({ name: role.name, code: role.code }));
-    const [selectedUserTmp, setSelectedUserTmp] = useState<UserTmp>({
-        fullName: '',
-        email: '',
-        avatar: '',
-        userName: '',
-        password: '',
-        firstLogin: 0,
-        inDate: '',
-        outDate: '',
-        failCount: 0,
-        isLocked: 0,
-        lastLogin: new Date(),
-        createdTime: new Date(),
-        createdBy: '',
-        updatedTime: new Date(),
-        updatedBy: '',
-        deletedTime: new Date(),
-        deletedBy: '',
-        deletedFlag: 0,
-        roleCode: []
-    });
-
-    async function fetch_Session() {
-        const sessionData: Session | null = await getServerSession(authOptions);
-        setSession(sessionData);
-    }
-
-    const get_User = async () => {
-        try {
-            if (session?.user?.token) {
-                const user = await getUser(session.user.token);
-                setUsers(user);
-                setinitialUsers(user);
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-    const get_Role = async () => {
-        try {
-            if (session?.user?.token) {
-                const role = await getRole(session.user.token);
-                setRoles(role);
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const handleDelete = async () => {
-        const ids = selectedCustomers ? selectedCustomers.map(user => user.id) : [];
-        if (ids.length > 0) {
-            try {
-                if (session?.user?.token) {
-                    for (const id of ids) {
-                        const res = await deleteUser(session.user.token, id, selectedUserTmp);
-                        if (res) {
-                            console.log('Deleted user with id:', id);
-                        } else {
-                            console.error('Error deleting user with id:', id, res);
-                        }
-                    }
-                    get_User();
-                    setSelectedCustomers([]);
-                    setSelectAll(false);
-                } else {
-                    console.error('User token is undefined');
-                }
-            } catch (error) {
-                console.error('Error deleting users:', error);
-            }
-        } else {
-            console.error('No users selected for deletion');
-        }
-    }
-
-    useEffect(() => {
-        if (!initialSession) {
-            fetch_Session();
-        }
-        get_User();
-        get_Role();
-    }, [])
-
-    useEffect(() => {
-        setData();
-    }, [selectedCustomers, isEdit])
-
-    const setData = () => {
-        if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
-            const user = selectedCustomers[0];
-            setSelectedUserTmp({
-                fullName: user.fullName,
-                email: user.email,
-                avatar: user.avatar,
-                userName: user.userName,
-                password: '',
-                firstLogin: user.firstLogin,
-                inDate: user.inDate,
-                outDate: user.outDate,
-                failCount: user.failCount,
-                isLocked: user.isLocked,
-                lastLogin: new Date(),
-                createdTime: new Date(),
-                createdBy: '',
-                updatedTime: new Date(),
-                updatedBy: '',
-                deletedTime: new Date(),
-                deletedBy: '',
-                deletedFlag: 0,
-                roleCode: []
-            });
-        } else {
-            setSelectedUserTmp({
-                fullName: '',
-                email: '',
-                avatar: '',
-                userName: '',
-                password: '',
-                firstLogin: 0,
-                inDate: '',
-                outDate: '',
-                failCount: 0,
-                isLocked: 0,
-                lastLogin: new Date(),
-                createdTime: new Date(),
-                createdBy: '',
-                updatedTime: new Date(),
-                updatedBy: '',
-                deletedTime: new Date(),
-                deletedBy: '',
-                deletedFlag: 0,
-                roleCode: []
-            });
-        }
-    };
-    
-    const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<User[]>) => {
-        const value = event.value;
-        const totalRecords = users ? users.length : 0;
-
-        setSelectedCustomers(value as unknown as User[]);
-        setSelectAll((value as unknown as User[]).length === totalRecords);
-    };
-    const onSelectAllChange = (event: DataTableSelectAllChangeEvent) => {
-        const selectAll = event.checked;
-
-        if (selectAll && users) {
-            setSelectAll(true);
-            setSelectedCustomers(users);
-        } else {
-            setSelectAll(false);
-            setSelectedCustomers([]);
-        }
-    };
-
-    const handleAdd = async () => {
-        try {
-            if (session?.user?.token) {
-                const res = await postUser(session.user.token, selectedUserTmp);
-                if (res) {
-                    setVisible(false);
-                    get_User();
-                } else {
-                    console.error('Error fetching data:', res);
-                }
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
-
-    const handleUpdate = async () => {
-        const id = selectedCustomers ? selectedCustomers.map(user => user.id) : [];
-        try {
-            if (session?.user?.token) {
-                const res = await putUser(session.user.token, id, selectedUserTmp);
-                if (res) {
-                    setVisible(false);
-                    get_User();
-                } else {
-                    console.error('Error fetching data:', res);
-                }
-            } else {
-                console.error('User token is undefined');
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
+    const {
+        users,
+        selectedCustomers,
+        roles,
+        selectedUserTmp,
+        setSelectedUserTmp,
+        visible,
+        setVisible,
+        isEdit,
+        setIsEdit,
+        selectAll,
+        handleDelete,
+        handleAdd,
+        handleUpdate,
+        onSelectionChange,
+        onSelectAllChange,
+        setSearchValue,
+        searchValue,
+    } = useUsers(initialSession);
+    const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
 
     return (
         <div className='p-4 m-4 flex flex-col md:flex-row gap-4'>
@@ -311,77 +64,155 @@ export default function tableUser({ session: initialSession }: TableUser) {
                 <div className='mb-4 flex gap-2'>
                     <div className='p-4 w-full md:w-4/6'>
                         <Button onClick={() => (setVisible(true))} icon="pi pi-plus" label="Add New User" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
-                        <Dialog header={isEdit ? 'Update User' : 'Add New User'} visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }} className="custom-dialog" closable={false}>
-                            <Card className="md:w-25rem">
-                                <div className="card flex flex-wrap justify-content-center gap-4 p-4">
-                                    <div className="p-inputgroup">
-                                        <span className="p-inputgroup-addon mx-1">
-                                            <i className="pi pi-user"></i>
-                                        </span>
-                                        {!isEdit ? (
-                                            <InputText type="text" placeholder="UserName" tooltip="Enter your UserName" value={selectedUserTmp?.userName || ''} onChange={(e) => {
-                                                if (selectedUserTmp) {
-                                                    setSelectedUserTmp({ ...selectedUserTmp, userName: e.target.value });
-                                                }
-                                            }} className="p-inputtext-lg" />
-                                        ) : (
-                                            <div className="p-inputtext-lg">{selectedCustomers ? selectedCustomers.map(user => user.userName).join(', ') : ''}</div>
-                                        )}
-                                    </div>
-                                    <div className="p-inputgroup">
-                                        <span className="p-inputgroup-addon mx-1">
-                                            <i className="pi pi-lock"></i>
-                                        </span>
-                                        <InputText type="password" placeholder="Password" tooltip="Enter your Password" value={selectedUserTmp?.password || ''} onChange={(e) => {
-                                            if (selectedUserTmp) {
-                                                setSelectedUserTmp({ ...selectedUserTmp, password: e.target.value });
+                        <Dialog
+                            header={isEdit ? "Update User" : "Add New User"}
+                            visible={visible}
+                            style={{ width: "450px" }}
+                            onHide={() => {
+                                if (!visible) return;
+                                setVisible(false);
+                            }}
+                            className="p-dialog-default"
+                            closable={false}
+                        >
+                            <div className="p-dialog-content">
+                                <div className="field">
+                                    <label htmlFor="userName">User Name</label>
+                                    {!isEdit ? (
+                                        <InputText
+                                            id="userName"
+                                            type="text"
+                                            tooltip="Enter your User Name"
+                                            value={selectedUserTmp?.userName || ""}
+                                            onChange={(e) =>
+                                                selectedUserTmp &&
+                                                setSelectedUserTmp({
+                                                    ...selectedUserTmp,
+                                                    userName: e.target.value,
+                                                })
                                             }
-                                        }} className="p-inputtext-lg" />
-                                    </div>
-                                    <div className="p-inputgroup">
-                                        <span className="p-inputgroup-addon mx-1">
-                                            <i className="pi pi-id-card"></i>
-                                        </span>
-                                        <InputText type="text" placeholder="FullName" tooltip="Enter your FullName" value={selectedUserTmp?.fullName || ''} onChange={(e) => {
-                                            if (selectedUserTmp) {
-                                                setSelectedUserTmp({ ...selectedUserTmp, fullName: e.target.value });
-                                            }
-                                        }} className="p-inputtext-lg" />
-                                    </div>
-                                    <div className="p-inputgroup">
-                                        <span className="p-inputgroup-addon mx-1">
-                                            <i className="pi pi-envelope"></i>
-                                        </span>
-                                        <InputText type="text" placeholder="Email" tooltip="Enter your Email" value={selectedUserTmp?.email || ''} onChange={(e) => {
-                                            if (selectedUserTmp) {
-                                                setSelectedUserTmp({ ...selectedUserTmp, email: e.target.value });
-                                            }
-                                        }} className="p-inputtext-lg" />
-                                    </div>
-                                    <div className="p-inputgroup">
-                                        <span className="p-inputgroup-addon mx-1">
-                                            <i className="pi pi-image"></i>
-                                        </span>
-                                        <InputText type="text" placeholder="Avatar" tooltip="Enter your Avatar" value={selectedUserTmp?.avatar || ''} onChange={(e) => {
-                                            if (selectedUserTmp) {
-                                                setSelectedUserTmp({ ...selectedUserTmp, avatar: e.target.value });
-                                            }
-                                        }} className="p-inputtext-lg" />
-                                    </div>
-                                    <div className="card flex justify-content-center w-full">
-                                        <MultiSelect value={selectedUserTmp?.roleCode} onChange={(e: MultiSelectChangeEvent) => {
-                                            if (selectedUserTmp) {
-                                                setSelectedUserTmp({ ...selectedUserTmp, roleCode: e.value });
-                                            }
-                                        }} options={rolesProps} optionLabel="name"
-                                            placeholder="Select Roles" maxSelectedLabels={3} className="w-full md:w-20rem p-multiselect-lg" tooltip="Choose Roles" />
-                                    </div>
+                                            className="p-inputtext p-inputtext-lg"
+                                        />
+                                    ) : (
+                                        <div className="p-inputtext-lg">
+                                            {selectedCustomers
+                                                ? selectedCustomers.map((user) => user.userName).join(", ")
+                                                : ""}
+                                        </div>
+                                    )}
                                 </div>
-                                <div className='flex justify-content-center gap-4 p-4'>
-                                    <Button className='w-full my-2 button-panel text-red-500 hover:text-red-700 p-button-lg' label="Close" onClick={() => (setIsEdit(false), setVisible(false))} />
-                                    <Button className='w-full my-2 button-panel text-green-500 hover:text-green-700 p-button-lg' label="Save" onClick={() => { isEdit ? handleUpdate() : handleAdd(); setIsEdit(false); }} />
+
+                                <div className="field">
+                                    <label htmlFor="password">Password</label>
+                                    <InputText
+                                        id="password"
+                                        type="password"
+                                        tooltip="Enter your Password"
+                                        value={selectedUserTmp?.password || ""}
+                                        onChange={(e) =>
+                                            selectedUserTmp &&
+                                            setSelectedUserTmp({
+                                                ...selectedUserTmp,
+                                                password: e.target.value,
+                                            })
+                                        }
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
                                 </div>
-                            </Card>
+
+                                <div className="field">
+                                    <label htmlFor="fullName">Full Name</label>
+                                    <InputText
+                                        id="fullName"
+                                        type="text"
+                                        tooltip="Enter your Full Name"
+                                        value={selectedUserTmp?.fullName || ""}
+                                        onChange={(e) =>
+                                            selectedUserTmp &&
+                                            setSelectedUserTmp({
+                                                ...selectedUserTmp,
+                                                fullName: e.target.value,
+                                            })
+                                        }
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
+
+                                <div className="field">
+                                    <label htmlFor="email">Email</label>
+                                    <InputText
+                                        id="email"
+                                        type="text"
+                                        tooltip="Enter your Email"
+                                        value={selectedUserTmp?.email || ""}
+                                        onChange={(e) =>
+                                            selectedUserTmp &&
+                                            setSelectedUserTmp({
+                                                ...selectedUserTmp,
+                                                email: e.target.value,
+                                            })
+                                        }
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
+
+                                <div className="field">
+                                    <label htmlFor="avatar">Avatar</label>
+                                    <InputText
+                                        id="avatar"
+                                        type="text"
+                                        tooltip="Enter your Avatar"
+                                        value={selectedUserTmp?.avatar || ""}
+                                        onChange={(e) =>
+                                            selectedUserTmp &&
+                                            setSelectedUserTmp({
+                                                ...selectedUserTmp,
+                                                avatar: e.target.value,
+                                            })
+                                        }
+                                        className="p-inputtext p-inputtext-lg"
+                                    />
+                                </div>
+
+                                <div className="field">
+                                    <label htmlFor="roles">Roles</label>
+                                    <MultiSelect
+                                        id="roles"
+                                        value={selectedUserTmp?.roleCode}
+                                        onChange={(e: MultiSelectChangeEvent) =>
+                                            selectedUserTmp &&
+                                            setSelectedUserTmp({ ...selectedUserTmp, roleCode: e.value })
+                                        }
+                                        options={rolesProps}
+                                        optionLabel="name"
+                                        placeholder="Select Roles"
+                                        maxSelectedLabels={3}
+                                        className="p-multiselect-lg"
+                                        tooltip="Choose Roles"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="p-dialog-footer">
+                                <Button
+                                    className="p-button-text text-red-500"
+                                    label="Cancel"
+                                    icon="pi pi-times"
+                                    onClick={() => {
+                                        setIsEdit(false);
+                                        setVisible(false);
+                                    }}
+                                />
+                                <Button
+                                    className="p-button-text text-green-500"
+                                    label="Save"
+                                    icon="pi pi-check"
+                                    onClick={() => {
+                                        isEdit ? handleUpdate() : handleAdd();
+                                        setIsEdit(false);
+                                    }}
+                                />
+                            </div>
                         </Dialog>
                         {(selectedCustomers && selectedCustomers.length > 1) && (
                             <Button onClick={() => handleDelete()} icon="pi pi-minus" label="Delete User" className="p-2 p-button-raised p-button-rounded p-button-danger text-red-500 hover:text-red-700" />
@@ -398,15 +229,12 @@ export default function tableUser({ session: initialSession }: TableUser) {
                             <span className="p-inputgroup-addon bg-blue-500 text-white rounded-l-md">
                                 <i className="pi pi-search"></i>
                             </span>
-                            <InputText className='border border-0.7 border-solid' placeholder="Search..." onChange={(e) => {
-                                const searchValue = e.target.value.toLowerCase();
-                                const filteredUsers = initialUsers?.filter(user =>
-                                    Object.values(user).some(value =>
-                                        value && value.toString().toLowerCase().includes(searchValue)
-                                    )
-                                );
-                                setUsers(filteredUsers || initialUsers);
-                            }} />
+                            <InputText
+                                className="border border-0.7 border-solid"
+                                placeholder="Search..."
+                                value={searchValue}
+                                onChange={(e) => setSearchValue(e.target.value)}
+                            />
                         </div>
                     </div>
                 </div>
