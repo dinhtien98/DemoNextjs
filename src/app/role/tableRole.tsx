@@ -37,7 +37,7 @@ export default function tableRole({ session: initialSession }: TableRole) {
 
     return (
         <div className='p-4 m-4 flex flex-col md:flex-row gap-4'>
-            <div className='p-4 w-full md:w-1/6 bg-white shadow-lg rounded-lg'>
+            <div className='p-4 w-1/6 bg-white shadow-lg rounded-lg'>
                 <div className='font-bold'>
                     <a href="/" className="text-black hover:text-blue-700">
                         <i className="pi pi-home mr-2"></i>Dashboard
@@ -61,84 +61,86 @@ export default function tableRole({ session: initialSession }: TableRole) {
                     </li>
                 </ul>
             </div>
-            <div className='p-4 w-full md:w-5/6 bg-white shadow-lg rounded-lg'>
+            <div className='p-4 w-5/6 bg-white shadow-lg rounded-lg'>
                 <div className='mb-4 flex gap-2'>
                     <div className='p-4 w-full md:w-4/6'>
                         <Button onClick={() => (setVisible(true))} icon="pi pi-plus" label="Add New Role" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
-                        <Dialog header={isEdit ? 'Update Role' : 'Add New Role'} visible={visible} style={{ width: '450px' }} onHide={() => { if (!visible) return; setVisible(false); }} className="p-dialog-default" closable={false}>
+                        <Dialog header={isEdit ? 'Update Role' : 'Add New Role'} visible={visible} style={{ width: '1024px' }} onHide={() => { if (!visible) return; setVisible(false); }} className="p-dialog-default" closable={false}>
                             <div className="p-dialog-content">
-                                <div className="field">
-                                    <label htmlFor="roleCode">Role Code</label>
-                                    {!isEdit ? (
+                                <div className='flex flex-wrap'>
+                                    <div className="field w-3/6 p-2">
+                                        <label htmlFor="roleCode">Role Code</label>
+                                        {!isEdit ? (
+                                            <InputText
+                                                id="roleCode"
+                                                type="text"
+                                                tooltip="Enter your RoleCode"
+                                                value={selectedRoleTmp?.code || ''}
+                                                onChange={(e) => {
+                                                    if (selectedRoleTmp) {
+                                                        setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value });
+                                                    }
+                                                }}
+                                                className="p-inputtext p-inputtext-lg"
+                                            />
+                                        ) : (
+                                            <div className="p-inputtext-lg">{selectedCustomers ? selectedCustomers.map(role => role.code).join(', ') : ''}</div>
+                                        )}
+                                    </div>
+
+                                    <div className="field w-3/6 p-2">
+                                        <label htmlFor="roleName">Role Name</label>
                                         <InputText
-                                            id="roleCode"
+                                            id="roleName"
                                             type="text"
-                                            tooltip="Enter your RoleCode"
-                                            value={selectedRoleTmp?.code || ''}
+                                            tooltip="Enter your Role Name"
+                                            value={selectedRoleTmp?.name || ''}
                                             onChange={(e) => {
                                                 if (selectedRoleTmp) {
-                                                    setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value });
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, name: e.target.value });
                                                 }
                                             }}
                                             className="p-inputtext p-inputtext-lg"
                                         />
-                                    ) : (
-                                        <div className="p-inputtext-lg">{selectedCustomers ? selectedCustomers.map(role => role.code).join(', ') : ''}</div>
-                                    )}
-                                </div>
+                                    </div>
 
-                                <div className="field">
-                                    <label htmlFor="roleName">Role Name</label>
-                                    <InputText
-                                        id="roleName"
-                                        type="text"
-                                        tooltip="Enter your Role Name"
-                                        value={selectedRoleTmp?.name || ''}
-                                        onChange={(e) => {
-                                            if (selectedRoleTmp) {
-                                                setSelectedRoleTmp({ ...selectedRoleTmp, name: e.target.value });
-                                            }
-                                        }}
-                                        className="p-inputtext p-inputtext-lg"
-                                    />
-                                </div>
+                                    <div className="field w-3/6 p-2">
+                                        <label htmlFor="pageCode">Pages</label>
+                                        <MultiSelect
+                                            id="pageCode"
+                                            value={selectedRoleTmp?.pageCode}
+                                            onChange={(e: MultiSelectChangeEvent) => {
+                                                if (selectedRoleTmp) {
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, pageCode: e.value });
+                                                }
+                                            }}
+                                            options={pageProps}
+                                            optionLabel="name"
+                                            placeholder="Select Pages"
+                                            maxSelectedLabels={3}
+                                            className="w-full md:w-20rem p-multiselect-lg"
+                                            tooltip="Choose Pages"
+                                        />
+                                    </div>
 
-                                <div className="field">
-                                    <label htmlFor="pageCode">Pages</label>
-                                    <MultiSelect
-                                        id="pageCode"
-                                        value={selectedRoleTmp?.pageCode}
-                                        onChange={(e: MultiSelectChangeEvent) => {
-                                            if (selectedRoleTmp) {
-                                                setSelectedRoleTmp({ ...selectedRoleTmp, pageCode: e.value });
-                                            }
-                                        }}
-                                        options={pageProps}
-                                        optionLabel="name"
-                                        placeholder="Select Pages"
-                                        maxSelectedLabels={3}
-                                        className="w-full md:w-20rem p-multiselect-lg"
-                                        tooltip="Choose Pages"
-                                    />
-                                </div>
-
-                                <div className="field">
-                                    <label htmlFor="actionCode">Actions</label>
-                                    <MultiSelect
-                                        id="actionCode"
-                                        value={selectedRoleTmp?.actionCode}
-                                        onChange={(e: MultiSelectChangeEvent) => {
-                                            if (selectedRoleTmp) {
-                                                setSelectedRoleTmp({ ...selectedRoleTmp, actionCode: e.value });
-                                            }
-                                        }}
-                                        options={actionProps}
-                                        optionLabel="name"
-                                        placeholder="Select Actions"
-                                        maxSelectedLabels={3}
-                                        className="w-full md:w-20rem p-multiselect-lg"
-                                        tooltip="Choose Actions"
-                                    />
+                                    <div className="field w-3/6 p-2">
+                                        <label htmlFor="actionCode">Actions</label>
+                                        <MultiSelect
+                                            id="actionCode"
+                                            value={selectedRoleTmp?.actionCode}
+                                            onChange={(e: MultiSelectChangeEvent) => {
+                                                if (selectedRoleTmp) {
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, actionCode: e.value });
+                                                }
+                                            }}
+                                            options={actionProps}
+                                            optionLabel="name"
+                                            placeholder="Select Actions"
+                                            maxSelectedLabels={3}
+                                            className="w-full md:w-20rem p-multiselect-lg"
+                                            tooltip="Choose Actions"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -188,16 +190,52 @@ export default function tableRole({ session: initialSession }: TableRole) {
                     </div>
                 </div>
                 <div>
-                    <DataTable value={roles || []} paginator rows={10} selectionMode="multiple"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        rowsPerPageOptions={[10, 25, 50]} dataKey="id" totalRecords={roles ? roles.length : 0}
-                        selection={selectedCustomers || []} onSelectionChange={isEdit ? undefined : onSelectionChange} selectAll={selectAll} onSelectAllChange={isEdit ? undefined : onSelectAllChange}
-                        rowClassName={(rowData) => selectedCustomers?.some(user => user.id === rowData.id) ? 'bg-blue-100' : rowData.deletedFlag === 1 ? 'bg-red-50' : rowData.deletedFlag === 0 ? 'bg-green-50' : ''}>
-                        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
-                        {roles && roles.length > 0 && Object.keys(roles[0]).map((key) => (
-                            <Column key={key} field={key} header={key.charAt(0).toUpperCase() + key.slice(1)} sortable filter filterPlaceholder={`Search by ${key}`} style={{ minWidth: '4rem' }} />
-                        ))}
-                    </DataTable>
+                    <div className="w-full overflow-x-auto">
+                        <DataTable
+                            value={roles || []}
+                            paginator
+                            rows={10}
+                            selectionMode="multiple"
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            rowsPerPageOptions={[10, 25, 50]}
+                            dataKey="id"
+                            totalRecords={roles ? roles.length : 0}
+                            selection={selectedCustomers || []}
+                            onSelectionChange={isEdit ? undefined : onSelectionChange}
+                            selectAll={selectAll}
+                            onSelectAllChange={isEdit ? undefined : onSelectAllChange}
+                            rowClassName={(rowData) =>
+                                selectedCustomers?.some((user) => user.id === rowData.id)
+                                    ? 'bg-blue-100'
+                                    : rowData.deletedFlag === 1
+                                        ? 'bg-red-50'
+                                        : rowData.deletedFlag === 0
+                                            ? 'bg-green-50'
+                                            : ''
+                            }
+                            style={{ width: '100%' }}
+                            tableStyle={{ tableLayout: 'auto' }}
+                        >
+                            <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
+                            {roles &&
+                                roles.length > 0 &&
+                                Object.keys(roles[0]).map((key) => (
+                                    <Column
+                                        key={key}
+                                        field={key}
+                                        header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                        sortable
+                                        filter
+                                        filterPlaceholder={`Search by ${key}`}
+                                        style={{
+                                            minWidth: '6rem',
+                                            maxWidth: '12rem',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    />
+                                ))}
+                        </DataTable>
+                    </div>
                 </div>
             </div>
         </div >

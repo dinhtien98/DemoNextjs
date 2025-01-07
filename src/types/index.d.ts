@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-wrapper-object-types */
 interface TablePage {
     session: Session;
 }
@@ -19,7 +20,6 @@ interface Pages {
     deletedTime: Date;
     deletedBy: string;
     deletedFlag: number;
-    roleCode: JSON[];
     actionCode: JSON[]
 }
 
@@ -44,7 +44,6 @@ interface PageTmp {
     fullName?: string;
     email?: string;
     avatar?: string;
-    roleCode: JSON[];
     actionCode: JSON[]
 }
 

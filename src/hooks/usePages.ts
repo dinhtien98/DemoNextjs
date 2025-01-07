@@ -90,7 +90,7 @@ export const usePages = (initialSession: Session | null) => {
   useEffect(() => {
     if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
       const page = selectedCustomers[0];
-      setSelectedPageTmp({ ...page });
+      setSelectedPageTmp({ ...page, createdTime: new Date(), updatedTime: new Date(), updatedBy: '', deletedBy: '', deletedTime: new Date(),});
     } else {
       setSelectedPageTmp(initialStatePage);
     }
@@ -104,7 +104,7 @@ export const usePages = (initialSession: Session | null) => {
         Object.values(pages).some(value =>
           value && value.toString().toLowerCase().includes(searchValue.toLowerCase())
         )
-      ) || []; 
+      ) || [];
       setPages(filteredPages);
     }
   }, [searchValue, initialPages]);
@@ -124,7 +124,6 @@ export const usePages = (initialSession: Session | null) => {
     pages,
     selectedCustomers,
     setSelectedCustomers,
-    roles,
     actions,
     selectedPageTmp,
     setSelectedPageTmp,
@@ -139,27 +138,26 @@ export const usePages = (initialSession: Session | null) => {
     handleUpdate,
     onSelectionChange,
     onSelectAllChange,
-    searchValue, 
-    setSearchValue
+    searchValue,
+    setSearchValue,
   };
 };
 
 const initialStatePage: PageTmp = {
-    code: '',
-    name: '',
-    parentCode: '',
-    level: 0,
-    url: '',
-    hidden: 0,
-    icon: '',
-    sort: 0,
-    createdTime: new Date(),
-    createdBy: '',
-    updatedTime: new Date(),
-    updatedBy: '',
-    deletedTime: new Date(),
-    deletedBy: '',
-    deletedFlag: 0,
-    roleCode: [],
-    actionCode: []
+  code: '',
+  name: '',
+  parentCode: '',
+  level: 0,
+  url: '',
+  hidden: 0,
+  icon: '',
+  sort: 0,
+  createdTime: new Date(),
+  createdBy: '',
+  updatedTime: new Date(),
+  updatedBy: '',
+  deletedTime: new Date(),
+  deletedBy: '',
+  deletedFlag: 0,
+  actionCode: []
 };
