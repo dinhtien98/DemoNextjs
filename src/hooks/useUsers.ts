@@ -80,7 +80,16 @@ export const useUsers = (initialSession: Session | null) => {
   useEffect(() => {
     if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
       const user = selectedCustomers[0];
-      setSelectedUserTmp({ ...user });
+      setSelectedUserTmp(
+        { ...user, password: '',
+        lastLogin: new Date(),
+        createdTime: new Date(),
+        createdBy: '',
+        updatedTime: new Date(),
+        updatedBy: '',
+        deletedTime: new Date(),
+        deletedBy: '',
+        deletedFlag: 0, });
     } else {
       setSelectedUserTmp(initialStateUser);
     }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-wrapper-object-types */
-interface TablePage {
+interface SessionProp {
     session: Session;
 }
 
@@ -59,10 +59,6 @@ interface Action {
     actionCode: string;
 }
 
-interface TableRole {
-    session: Session;
-}
-
 interface Roles {
     id: number;
     name: string;
@@ -96,10 +92,6 @@ interface Page {
     id: number;
     name: string;
     code: string;
-}
-
-interface TableUser {
-    session: Session;
 }
 
 interface Users {

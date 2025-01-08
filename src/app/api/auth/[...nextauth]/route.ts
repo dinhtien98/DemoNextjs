@@ -47,6 +47,10 @@ export const authOptions: NextAuthOptions = {
                     }
 
                     const responseData = await res.json();
+                    if(!responseData || !responseData.data.userName){
+                        console.error(responseData.data.token)
+                        return null;
+                    }
                     if (!responseData || !responseData.data.token) {
                         console.error("Failed to retrieve token");
                         return null;

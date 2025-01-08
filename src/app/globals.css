@@ -34,50 +34,96 @@ body {
   left: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
-  background-color: white; 
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 
-.p-button{
+.p-button {
   margin: 0 0.5rem;
 }
 
 .field {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   margin-bottom: 1rem;
 }
 
 .field label {
-  margin-bottom: 0.5rem; 
+  margin-bottom: 0.5rem;
 }
 
 .p-inputtext {
   border: 1px solid rgb(0, 0, 0, 0.2);
-  transition: border-color 0.3s ease; 
+  transition: border-color 0.3s ease;
   border-radius: 5px;
   padding: 5px;
 }
 
 .p-inputtext:hover {
-  border-color: #007ad9; 
+  border-color: #007ad9;
 }
 
 .p-inputtext:focus {
-  border-color: #007ad9; 
+  border-color: #007ad9;
   box-shadow: 0 0 0 0.1rem rgba(0, 122, 217, 0.5);
 }
 
 .p-button-text {
   align-items: center;
-  padding: 0.5rem 1rem; 
+  padding: 0.5rem 1rem;
   font-size: 1rem;
-  border-radius: 5px; 
-  transition: all 0.3s ease; 
+  border-radius: 5px;
+  transition: all 0.3s ease;
 }
 
 .p-button-text:hover {
-  background-color: #f0f0f0; 
-  cursor: pointer; 
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+.tree-container {
+  font-size: 1.2rem;
+  width: 100%; 
+}
+
+.p-treenode-content {
+  align-items: center;
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px; 
+}
+
+.tree-item span {
+  font-weight: 500;
+  color: #333; 
+}
+
+.node-label {
+  font-size: 1.2rem;
+}
+
+.tree-item .p-speeddial {
+  margin-top: 9px;
+}
+
+.tree-item .p-speeddial .p-speeddial-button {
+  background-color: #888888; 
+  color: white;
+  height: 30px;
+  width: 30px;
+}
+
+.p-speeddial-list .p-speeddial-item .p-speeddial-action{
+  background-color: #969696; 
+  color: white;
+  height: 30px;
+  width: 30px;
+}
+
+.tree-item .p-speeddial .p-speeddial-button:hover {
+  background-color: #7c7c7c; 
 }
 

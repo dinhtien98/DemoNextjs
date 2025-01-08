@@ -12,7 +12,7 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
 import { useUsers } from '@/hooks/useUsers';
 
 
-export default function tableUser({ session: initialSession }: TableUser) {
+export default function tableUser({ session: initialSession }: SessionProp) {
     const {
         users,
         selectedCustomers,
@@ -33,7 +33,7 @@ export default function tableUser({ session: initialSession }: TableUser) {
         searchValue,
     } = useUsers(initialSession);
     const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
-    console.log(rolesProps)
+   
     return (
         <div className="p-4 flex flex-col md:flex-row gap-4">
             <div className='p-4 w-1/6 bg-white shadow-lg rounded-lg'>
@@ -115,20 +115,20 @@ export default function tableUser({ session: initialSession }: TableUser) {
                             }
                         >
                             <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
-                            {users && users.length > 0 && Object.keys(users[0]).map((key) => {
+                            {users && users.length > 0 && Object.keys(users[0]).map((key, index) => {
                                 if (key === "password") return null;
                                 if (key === "roleCode") {
                                     return (
                                         <Column
-                                            key={key}
+                                            key={`roleCode-${index}`}
                                             header="RoleCode"
                                             body={(rowData) => (
                                                 <div className="flex">
                                                     {roles &&
                                                         roles.length > 0 &&
-                                                        roles.map((role) => (
+                                                        roles.map((role, roleIndex) => (
                                                             <div
-                                                                key={role.code}
+                                                                key={`role-${role.code}-${roleIndex}`}
                                                                 className="mx-1 justify-center flex items-center"
                                                             >
                                                                 {rowData.roleCode?.some(
@@ -154,7 +154,7 @@ export default function tableUser({ session: initialSession }: TableUser) {
                                 }
                                 return (
                                     <Column
-                                        key={key}
+                                        key={`column-${key}-${index}`}
                                         field={key}
                                         header={key.charAt(0).toUpperCase() + key.slice(1)}
                                         sortable
@@ -271,7 +271,7 @@ export default function tableUser({ session: initialSession }: TableUser) {
                                     setSelectedUserTmp({ ...selectedUserTmp, roleCode: e.value })
                                 }
                                 options={rolesProps}
-                                optionLabel="name"
+                                optionLabel="code"
                                 placeholder="Select Roles"
                                 maxSelectedLabels={3}
                                 className="p-multiselect-lg"

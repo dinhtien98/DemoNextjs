@@ -10,7 +10,6 @@ import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
-import Providers from './components/providers';
 import Header from "@/components/header";
 
 const geistSans = Geist({
@@ -41,9 +40,7 @@ export default function RootLayout({
       >
         <PrimeReactProvider>
           <Header />
-          <Providers>
             {children}
-          </Providers>
           <Footer />
         </PrimeReactProvider>
       </body>

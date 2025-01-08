@@ -11,7 +11,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useRoles } from '@/hooks/useRoles';
 
-export default function tableRole({ session: initialSession }: TableRole) {
+export default function tableRole({ session: initialSession }: SessionProp) {
     const {
         roles,
         selectedCustomers,
@@ -32,9 +32,9 @@ export default function tableRole({ session: initialSession }: TableRole) {
         setSearchValue,
         searchValue,
     } = useRoles(initialSession);
-    const pageProps = pages?.map((page) => ({ name: page.name, code: page.code }));
-    const actionProps = actions?.map((action) => ({ name: action.name, code: action.actionCode }));
-
+    const pageProps = pages?.map((page) => ({ code: page.code }));
+    const actionProps = actions?.map((action) => ({ code: action.actionCode }));
+    
     return (
         <div className='p-4 m-4 flex flex-col md:flex-row gap-4'>
             <div className='p-4 w-1/6 bg-white shadow-lg rounded-lg'>
@@ -75,7 +75,7 @@ export default function tableRole({ session: initialSession }: TableRole) {
                                                 id="roleCode"
                                                 type="text"
                                                 tooltip="Enter your RoleCode"
-                                                value={selectedRoleTmp?.code || ''}
+                                                value={selectedRoleTmp?.code ?? ''}
                                                 onChange={(e) => {
                                                     if (selectedRoleTmp) {
                                                         setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value });
@@ -115,11 +115,12 @@ export default function tableRole({ session: initialSession }: TableRole) {
                                                 }
                                             }}
                                             options={pageProps}
-                                            optionLabel="name"
+                                            optionLabel="code"
                                             placeholder="Select Pages"
                                             maxSelectedLabels={3}
                                             className="w-full md:w-20rem p-multiselect-lg"
                                             tooltip="Choose Pages"
+                                            selectedItemsLabel="Selected Page"
                                         />
                                     </div>
 
@@ -134,11 +135,12 @@ export default function tableRole({ session: initialSession }: TableRole) {
                                                 }
                                             }}
                                             options={actionProps}
-                                            optionLabel="name"
+                                            optionLabel="code"
                                             placeholder="Select Actions"
                                             maxSelectedLabels={3}
                                             className="w-full md:w-20rem p-multiselect-lg"
                                             tooltip="Choose Actions"
+                                            selectedItemsLabel="Selected Actions"
                                         />
                                     </div>
                                 </div>
@@ -219,21 +221,92 @@ export default function tableRole({ session: initialSession }: TableRole) {
                             <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
                             {roles &&
                                 roles.length > 0 &&
-                                Object.keys(roles[0]).map((key) => (
-                                    <Column
-                                        key={key}
-                                        field={key}
-                                        header={key.charAt(0).toUpperCase() + key.slice(1)}
-                                        sortable
-                                        filter
-                                        filterPlaceholder={`Search by ${key}`}
-                                        style={{
-                                            minWidth: '6rem',
-                                            maxWidth: '12rem',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    />
-                                ))}
+                                Object.keys(roles[0]).map((key) => {
+
+                                    if (key === 'pageCode') {
+                                        return (
+                                            <Column
+                                                key={key}
+                                                header="PageCode"
+                                                body={(rowData) => (
+                                                    <div className="flex">
+                                                        {pages &&
+                                                            pages.length > 0 &&
+                                                            pages.map((page) => (
+                                                                <div
+                                                                    key={page.code}
+                                                                    className="mx-1 justify-center flex items-center"
+                                                                >
+                                                                    {rowData.actionCode?.some(
+                                                                        (pc: { code: string }) =>
+                                                                            pc.code === page.code
+                                                                    ) ? (
+                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
+                                                                            <i className="pi pi-check text-green-500" />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
+                                                                            <i className="pi pi-times text-red-500" />
+                                                                        </div>
+                                                                    )}
+                                                                    {page.code}
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                )}
+                                                style={{ minWidth: '6rem' }}
+                                            />
+                                        );
+                                    }
+
+                                    if (key === 'actionCode') {
+                                        return (
+                                            <Column
+                                                key={key}
+                                                header="Actions"
+                                                body={(rowData) => (
+                                                    <div className="flex">
+                                                        {actions &&
+                                                            actions.length > 0 &&
+                                                            actions.map((action) => (
+                                                                <div
+                                                                    key={action.actionCode}
+                                                                    className="mx-1 justify-center flex items-center"
+                                                                >
+                                                                    {rowData.actionCode?.some(
+                                                                        (ac: { code: string }) =>
+                                                                            ac.code === action.actionCode
+                                                                    ) ? (
+                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
+                                                                            <i className="pi pi-check text-green-500" />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
+                                                                            <i className="pi pi-times text-red-500" />
+                                                                        </div>
+                                                                    )}
+                                                                    {action.actionCode}
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                )}
+                                                style={{ minWidth: '6rem' }}
+                                            />
+                                        );
+                                    }
+
+                                    return (
+                                        <Column
+                                            key={key}
+                                            field={key}
+                                            header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                            sortable
+                                            filter
+                                            filterPlaceholder={`Search by ${key}`}
+                                            style={{ minWidth: '6rem', maxWidth: '15rem' }}
+                                        />
+                                    );
+                                })}
                         </DataTable>
                     </div>
                 </div>

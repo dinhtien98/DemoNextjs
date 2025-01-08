@@ -90,12 +90,12 @@ export const useRoles = (initialSession: Session | null) => {
     useEffect(() => {
         if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
             const role = selectedCustomers[0];
-            setSelectedRoleTmp((prev) => ({ ...prev, name: role.name, code: role.code }));
+            setSelectedRoleTmp({...role})
         } else {
             setSelectedRoleTmp(initialStateRole);
         }
     }, [selectedCustomers, isEdit]);
-    console.log(selectedRoleTmp)
+    
     useEffect(() => {
         if (searchValue === '') {
             setRoles(initialRoles);
