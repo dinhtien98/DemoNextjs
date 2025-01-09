@@ -36,34 +36,10 @@ export default function tableRole({ session: initialSession }: SessionProp) {
     const actionProps = actions?.map((action) => ({ code: action.actionCode }));
     
     return (
-        <div className='p-4 m-4 flex flex-col md:flex-row gap-4'>
-            <div className='p-4 w-1/6 bg-white shadow-lg rounded-lg'>
-                <div className='font-bold'>
-                    <a href="/" className="text-black hover:text-blue-700">
-                        <i className="pi pi-home mr-2"></i>Dashboard
-                    </a>
-                </div>
-                <ul className="menu p-4 text-lg font-bold">
-                    <li className="menu-item p-2">
-                        <a href="/user" className="text-black hover:text-blue-700">
-                            <i className="pi pi-user mr-2"></i>User
-                        </a>
-                    </li>
-                    <li className="menu-item p-2">
-                        <a href="/page" className="text-black hover:text-blue-700">
-                            <i className="pi pi-file mr-2"></i>Page
-                        </a>
-                    </li>
-                    <li className="menu-item p-2">
-                        <a href="/role" className="text-blue-700">
-                            <i className="pi pi-users mr-2"></i>Role
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div className='p-4 w-5/6 bg-white shadow-lg rounded-lg'>
-                <div className='mb-4 flex gap-2'>
-                    <div className='p-4 w-full md:w-4/6'>
+        <div className="w-full p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2">
+            <div className="p-4 w-full bg-white ">
+                <div className="flex gap-2">
+                    <div className="p-4 w-full md:w-4/6">
                         <Button onClick={() => (setVisible(true))} icon="pi pi-plus" label="Add New Role" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
                         <Dialog header={isEdit ? 'Update Role' : 'Add New Role'} visible={visible} style={{ width: '1024px' }} onHide={() => { if (!visible) return; setVisible(false); }} className="p-dialog-default" closable={false}>
                             <div className="p-dialog-content">

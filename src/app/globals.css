@@ -14,6 +14,7 @@
   }
 }
 
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -88,6 +89,9 @@ body {
 
 .p-treenode-content {
   align-items: center;
+  background-color: #e9ecef;
+  padding: 0.5rem;
+  margin: 5px 0;
 }
 
 .tree-item {
@@ -101,12 +105,16 @@ body {
   color: #333; 
 }
 
+.pi-ellipsis-v {
+  color: #ffffff !important;
+}
+
 .node-label {
   font-size: 1.2rem;
 }
 
 .tree-item .p-speeddial {
-  margin-top: 9px;
+  margin-top: 5px;
 }
 
 .tree-item .p-speeddial .p-speeddial-button {
@@ -127,3 +135,14 @@ body {
   background-color: #7c7c7c; 
 }
 
+.p-tree .p-treenode-content.level-1 {
+  margin-left: 20px;
+}
+
+.p-tree .p-treenode-content.level-2 {
+  margin-left: 40px;
+}
+
+.p-tree .p-treenode-content.level-3 {
+  margin-left: 60px;
+}

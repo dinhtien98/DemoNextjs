@@ -16,7 +16,6 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
 export default function treePage({ session: initialSession }: SessionProp) {
     const {
         pages,
-        selectedCustomers,
         actions,
         selectedPageTmp,
         setSelectedPageTmp,
@@ -27,10 +26,13 @@ export default function treePage({ session: initialSession }: SessionProp) {
         handleAdd,
         handleUpdate,
         handleDelete,
+        initialStatePage,
+        setSelectedID,
+        errors,
     } = usePages(initialSession);
 
     const actionProps = actions?.map((action) => ({ code: action.actionCode }));
-    const buildTreeData = (data: any[]) => {
+    const buildTreeData = (data: any[], level = 0) => {
         if (!Array.isArray(data)) {
             console.error('Invalid data: Expected an array, but got:', data);
             return [];
@@ -45,6 +47,8 @@ export default function treePage({ session: initialSession }: SessionProp) {
                 key: item.code,
                 label: item.name,
                 children: [],
+                level,
+                className: `level-${level}`,
             });
         });
 
@@ -52,7 +56,10 @@ export default function treePage({ session: initialSession }: SessionProp) {
             if (item.parentCode) {
                 const parent = map.get(item.parentCode);
                 if (parent) {
-                    parent.children.push(map.get(item.code));
+                    const childNode = map.get(item.code);
+                    childNode.level = parent.level + 1;
+                    childNode.className = `level-${childNode.level}`;
+                    parent.children.push(childNode);
                 }
             } else {
                 roots.push(map.get(item.code));
@@ -64,9 +71,55 @@ export default function treePage({ session: initialSession }: SessionProp) {
 
     const treeNodeTemplate = (node: any) => {
         const items = [
-            { label: 'Add', icon: 'pi pi-plus', command: () => setVisible(true) },
-            { label: 'Edit', icon: 'pi pi-pencil', command: () => (setVisible(true), setIsEdit(true)) },
-            { label: 'Delete', icon: 'pi pi-trash', command: () => handleDelete },
+            {
+                label: 'Add',
+                icon: 'pi pi-plus',
+                command: () => {
+                    setSelectedPageTmp((prev) => ({
+                        ...prev,
+                        parentCode: node.code,
+                        level: (node.level || 0) + 1,
+                    }));
+                    setIsEdit(false);
+                    setVisible(true);
+                },
+            },
+            {
+                label: 'Edit',
+                icon: 'pi pi-pencil',
+                command: () => {
+                    setSelectedID(node.id)
+                    setSelectedPageTmp((prev) => ({
+                        ...prev,
+                        code: node.code,
+                        name: node.name,
+                        parentCode: node.parentCode,
+                        level: node.level,
+                        url: node.url,
+                        hidden: node.hidden,
+                        icon: node.icon,
+                        sort: node.sort,
+                        createdTime: new Date(),
+                        createdBy: '',
+                        updatedTime: new Date(),
+                        updatedBy: '',
+                        deletedTime: new Date(),
+                        deletedBy: '',
+                        deletedFlag: 0,
+                        actionCode: node.actionCode
+                    }));
+
+                    setIsEdit(true);
+                    setVisible(true);
+                },
+            },
+            {
+                label: 'Delete',
+                icon: 'pi pi-trash',
+                command: () => {
+                    handleDelete(node.id);
+                },
+            },
         ];
 
         return (
@@ -81,7 +134,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
                             showIcon="pi pi-ellipsis-v"
                             hideIcon="pi pi-times"
                             buttonClassName="p-button-outlined"
-                            style={{ position: "relative" }}
+                            style={{ position: 'relative' }}
                         />
                     </div>
                 </div>
@@ -89,41 +142,15 @@ export default function treePage({ session: initialSession }: SessionProp) {
         );
     };
 
-
     const treeData = buildTreeData(pages || []);
 
     return (
-        <div className="p-4 m-4 flex flex-col md:flex-row gap-4">
-            <div className="p-4 w-1/6 bg-white shadow-lg rounded-lg">
-                <div className="font-bold">
-                    <a href="/" className="text-black hover:text-blue-700">
-                        <i className="pi pi-home mr-2"></i>Dashboard
-                    </a>
-                </div>
-                <ul className="menu p-4 text-lg font-bold">
-                    <li className="menu-item p-2">
-                        <a href="/user" className="text-black hover:text-blue-700">
-                            <i className="pi pi-user mr-2"></i>User
-                        </a>
-                    </li>
-                    <li className="menu-item p-2">
-                        <a href="/page" className="text-blue-700">
-                            <i className="pi pi-file mr-2"></i>Page
-                        </a>
-                    </li>
-                    <li className="menu-item p-2">
-                        <a href="/role" className="text-black hover:text-blue-700">
-                            <i className="pi pi-users mr-2"></i>Role
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div className="p-4 w-5/6 bg-white shadow-lg rounded-lg">
-                <div className="mb-4 flex gap-2">
+        <div className="w-full p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2">
+            <div className="p-4 w-full bg-white ">
+                <div className="flex gap-2">
                     <div className="p-4 w-full md:w-4/6">
                         <Button
-                            onClick={() => setVisible(true)}
+                            onClick={() => (setVisible(true), setSelectedPageTmp(initialStatePage))}
                             icon="pi pi-plus"
                             label="Add New Page"
                             className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700"
@@ -143,18 +170,30 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                 <div className="flex flex-wrap">
                                     <div className="field w-2/6 p-2">
                                         <label htmlFor="pageCode">Page Code</label>
-                                        <InputText
-                                            id="pageCode"
-                                            type="text"
-                                            tooltip="Enter your Page Code"
-                                            value={selectedPageTmp?.code || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, code: e.target.value });
-                                                }
-                                            }}
-                                            className="p-inputtext p-inputtext-lg"
-                                        />
+                                        {isEdit ? (
+                                            <InputText
+                                                id="pageCode"
+                                                type="text"
+                                                tooltip="Enter your Page Code"
+                                                value={selectedPageTmp?.code || ''}
+                                                disabled
+                                                className="p-inputtext p-inputtext-lg"
+                                            />
+                                        ) : (
+                                            <InputText
+                                                id="pageCode"
+                                                type="text"
+                                                tooltip="Enter your Page Code"
+                                                value={selectedPageTmp?.code || ''}
+                                                onChange={(e) => {
+                                                    if (selectedPageTmp) {
+                                                        setSelectedPageTmp({ ...selectedPageTmp, code: e.target.value });
+                                                    }
+                                                }}
+                                                className="p-inputtext p-inputtext-lg"
+                                            />
+                                        )}
+                                        {errors.code && <small className="p-error">{errors.code}</small>}
                                     </div>
 
                                     <div className="field w-2/6 p-2">
@@ -171,6 +210,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                             }}
                                             className="p-inputtext p-inputtext-lg"
                                         />
+                                        {errors.name && <small className="p-error">{errors.name}</small>}
                                     </div>
 
                                     <div className="field w-2/6 p-2">
@@ -180,11 +220,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                             type="text"
                                             tooltip="Enter your Page Parent Code"
                                             value={selectedPageTmp?.parentCode || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, parentCode: e.target.value });
-                                                }
-                                            }}
+                                            disabled
                                             className="p-inputtext p-inputtext-lg"
                                         />
                                     </div>
@@ -196,14 +232,11 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                             type="number"
                                             tooltip="Enter your Page Level"
                                             value={selectedPageTmp?.level?.toString() || ''}
-                                            onChange={(e) => {
-                                                if (selectedPageTmp) {
-                                                    setSelectedPageTmp({ ...selectedPageTmp, level: parseInt(e.target.value) });
-                                                }
-                                            }}
+                                            disabled
                                             className="p-inputtext p-inputtext-lg"
                                         />
                                     </div>
+
                                     <div className="field w-2/6 p-2">
                                         <label htmlFor="pageURL">Page URL</label>
                                         <InputText
@@ -218,6 +251,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                             }}
                                             className="p-inputtext p-inputtext-lg"
                                         />
+                                        {errors.url && <small className="p-error">{errors.url}</small>}
                                     </div>
 
                                     <div className="field w-2/6 p-2">
@@ -234,6 +268,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                             }}
                                             className="p-inputtext p-inputtext-lg"
                                         />
+                                        {errors.icon && <small className="p-error">{errors.icon}</small>}
                                     </div>
 
                                     <div className="field w-2/6 p-2">
@@ -279,6 +314,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                 />
                             </div>
                         </Dialog>
+
                     </div>
                 </div>
                 <div className="tree-container">

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { getServerSession, Session } from 'next-auth';
 import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData } from '@/services/apis';
@@ -13,13 +12,13 @@ export const usePages = (initialSession: Session | null) => {
   const [selectedCustomers, setSelectedCustomers] = useState<Pages[] | null>(null);
   const [visible, setVisible] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [roles, setRoles] = useState<Role[] | null>(null);
   const [actions, setActions] = useState<Action[] | null>(null);
   const [selectedPageTmp, setSelectedPageTmp] = useState<PageTmp>(initialStatePage);
   const [searchValue, setSearchValue] = useState('');
+  const [seletedID, setSelectedID] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const endpointPage = 'authPage';
-  const endpointRole = 'authRole';
   const endpointAction = 'AuthAction';
 
   const get_Session = async () => {
@@ -35,13 +34,6 @@ export const usePages = (initialSession: Session | null) => {
     }
   };
 
-  const get_Role = async () => {
-    if (session?.user?.token) {
-      const role = await fetchGetData(session.user.token, endpointRole);
-      setRoles(role);
-    }
-  };
-
   const get_Action = async () => {
     if (session?.user?.token) {
       const action = await fetchGetData(session.user.token, endpointAction);
@@ -49,33 +41,68 @@ export const usePages = (initialSession: Session | null) => {
     }
   };
 
-  const handleDelete = async () => {
-    const ids = selectedCustomers ? selectedCustomers.map(pages => pages.id) : [];
-    if (ids.length > 0 && session?.user?.token) {
-      for (const id of ids) {
-        await fetchDeleteData(session.user.token, endpointPage, id, selectedPageTmp);
-      }
+  const handleDelete = async (id: string) => {
+    if (session?.user?.token) {
+      await fetchDeleteData(session.user.token, endpointPage, id, selectedPageTmp);
       get_Page();
-      setSelectedCustomers([]);
       setSelectAll(false);
     }
   };
 
   const handleAdd = async () => {
     if (session?.user?.token) {
-      await fetchPostData(session.user.token, endpointPage, selectedPageTmp);
-      setVisible(false);
-      get_Page();
+      if (validateFields()) {
+        await fetchPostData(session.user.token, endpointPage, selectedPageTmp);
+        setVisible(false);
+        get_Page();
+      }
     }
   };
 
   const handleUpdate = async () => {
-    const id = selectedCustomers ? selectedCustomers.map(pages => pages.id) : [];
     if (session?.user?.token) {
-      await fetchPutData(session.user.token, endpointPage, id, selectedPageTmp);
-      setVisible(false);
-      get_Page();
+      if (validateFields()) {
+        await fetchPutData(session.user.token, endpointPage, seletedID, selectedPageTmp);
+        setSelectedID('');
+        setVisible(false);
+        get_Page();
+      }
     }
+  };
+
+  const validateFields = () => {
+    const newErrors: { [key: string]: string } = {};
+
+
+    const duplicateCode = pages?.some(page => page.code === selectedPageTmp.code && page.code !== selectedPageTmp.code);
+    if (duplicateCode) {
+      newErrors.code = "Page Code already exists.";
+    }
+
+    const duplicateURL = pages?.some(page => page.url === selectedPageTmp.url && page.url !== selectedPageTmp.url);
+    if (duplicateURL) {
+      newErrors.url = "Page URL already exists.";
+    }
+
+
+    if (!selectedPageTmp.code) {
+      newErrors.code = "Page Code is required.";
+    }
+
+    if (!selectedPageTmp.name) {
+      newErrors.name = "Page Name is required.";
+    }
+
+    if (!selectedPageTmp.url) {
+      newErrors.url = "Page URL is required.";
+    }
+
+    if (!selectedPageTmp.icon) {
+      newErrors.icon = "Page Icon is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   useEffect(() => {
@@ -83,18 +110,8 @@ export const usePages = (initialSession: Session | null) => {
       get_Session();
     }
     get_Page();
-    get_Role();
     get_Action();
   }, [initialSession]);
-
-  useEffect(() => {
-    if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
-      const page = selectedCustomers[0];
-      setSelectedPageTmp({ ...page, createdTime: new Date(), updatedTime: new Date(), updatedBy: '', deletedBy: '', deletedTime: new Date(),});
-    } else {
-      setSelectedPageTmp(initialStatePage);
-    }
-  }, [selectedCustomers, isEdit]);
 
   useEffect(() => {
     if (searchValue === '') {
@@ -140,6 +157,10 @@ export const usePages = (initialSession: Session | null) => {
     onSelectAllChange,
     searchValue,
     setSearchValue,
+    initialStatePage,
+    setSelectedID,
+    errors,
+    setErrors,
   };
 };
 

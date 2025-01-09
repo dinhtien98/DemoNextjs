@@ -33,37 +33,13 @@ export default function tableUser({ session: initialSession }: SessionProp) {
         searchValue,
     } = useUsers(initialSession);
     const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
-   
+
     return (
-        <div className="p-4 flex flex-col md:flex-row gap-4">
-            <div className='p-4 w-1/6 bg-white shadow-lg rounded-lg'>
-                <div className='font-bold'>
-                    <a href="/" className="text-black hover:text-blue-700">
-                        <i className="pi pi-home mr-2"></i>Dashboard
-                    </a>
-                </div>
-                <ul className="menu p-4 text-lg font-bold">
-                    <li className="menu-item p-2">
-                        <a href="/user" className="text-blue-700">
-                            <i className="pi pi-user mr-2"></i>User
-                        </a>
-                    </li>
-                    <li className="menu-item p-2">
-                        <a href="/page" className="text-black hover:text-blue-700">
-                            <i className="pi pi-file mr-2"></i>Page
-                        </a>
-                    </li>
-                    <li className="menu-item p-2">
-                        <a href="/role" className="text-black hover:text-blue-700">
-                            <i className="pi pi-users mr-2"></i>Role
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div className='p-4 w-5/6 bg-white shadow-lg rounded-lg'>
-                <div className='mb-4 w-full flex-wrap gap-2 overflow-x-hidden'>
+        <div className="w-full p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2">
+            <div className="p-4 w-full bg-white ">
+                <div className='w-full flex-wrap gap-2 overflow-x-hidden'>
                     <div className='mb-4 flex gap-2 w-full'>
-                        <div className='p-4 w-full md:w-1/6'>
+                        <div className='p-4 w-full md:w-2/3'>
                             <Button onClick={() => (setVisible(true))} icon="pi pi-plus" label="Add New User" className="p-2 p-button-raised p-button-rounded p-button-primary text-green-500 hover:text-green-700" />
 
                             {(selectedCustomers && selectedCustomers.length > 1) && (
