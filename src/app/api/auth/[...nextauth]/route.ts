@@ -35,6 +35,7 @@ export const authOptions: NextAuthOptions = {
                         body: JSON.stringify({
                             userName: credentials?.userName,
                             password: credentials?.password,
+                            redirect: false,
                         }),
                         headers: {
                             "Content-Type": "application/json",
@@ -42,18 +43,16 @@ export const authOptions: NextAuthOptions = {
                     });
 
                     if (!res.ok) {
-                        console.error("Failed to authenticate:", res.statusText);
-                        return null;
+                        const errorResponse = await res.json();
+                        throw new Error(errorResponse.message || "Invalid credentials");
                     }
 
                     const responseData = await res.json();
-                    if(!responseData || !responseData.data.userName){
-                        console.error(responseData.data.token)
-                        return null;
-                    }
                     if (!responseData || !responseData.data.token) {
-                        console.error("Failed to retrieve token");
-                        return null;
+                        throw new Error(responseData.data.token || "Authentication failed");
+                    }
+                    if(!responseData || !responseData.data.userName){
+                        throw new Error(responseData.data.token || "Authentication failed");
                     }
 
                     return {
@@ -62,11 +61,13 @@ export const authOptions: NextAuthOptions = {
                         fullName: responseData.data.fullName,
                     };
                 } catch (error) {
-                    console.error("Error during authentication:", error);
-                    return null;
+                    if (error instanceof Error) {
+                        throw new Error(error.message || "An error occurred during authentication");
+                    }
+                    throw new Error("An unknown error occurred during authentication");
                 }
             },
-        }),
+        })
     ],
     session: {
         strategy: "jwt",

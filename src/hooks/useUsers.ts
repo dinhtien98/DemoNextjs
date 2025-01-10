@@ -16,6 +16,7 @@ export const useUsers = (initialSession: Session | null) => {
   const [roles, setRoles] = useState<Role[] | null>(null);
   const [selectedUserTmp, setSelectedUserTmp] = useState<UserTmp>(initialStateUser);
   const [searchValue, setSearchValue] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const endpointUser = 'authUser';
   const endpointRole = 'authRole';
@@ -54,19 +55,57 @@ export const useUsers = (initialSession: Session | null) => {
 
   const handleAdd = async () => {
     if (session?.user?.token) {
-      await fetchPostData(session.user.token, endpointUser, selectedUserTmp);
-      setVisible(false);
-      get_User();
+      if (validateFields('add')) {
+        await fetchPostData(session.user.token, endpointUser, selectedUserTmp);
+        setVisible(false);
+        get_User();
+      }
     }
   };
 
   const handleUpdate = async () => {
     const id = selectedCustomers ? selectedCustomers.map(user => user.id) : [];
+    if (validateFields('update')) {
     if (session?.user?.token) {
       await fetchPutData(session.user.token, endpointUser, id, selectedUserTmp);
       setVisible(false);
       get_User();
+    }}
+  };
+
+  const validateFields = (key: string) => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (key === 'add') {
+      const duplicateCode = users?.some(user => user.userName === selectedUserTmp.userName);
+      if (duplicateCode) {
+        newErrors.userName = "userName already exists.";
+      }
+      if (!selectedUserTmp.password) {
+        newErrors.password = "password is required.";
+      }
     }
+
+    if (!selectedUserTmp.userName) {
+      newErrors.userName = "userName is required.";
+    }
+
+    
+
+    if (!selectedUserTmp.fullName) {
+      newErrors.fullName = "fullName is required.";
+    }
+
+    if (!selectedUserTmp.email) {
+      newErrors.email = "email is required.";
+    }
+
+    if (!selectedUserTmp.avatar) {
+      newErrors.avatar = "avatar is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   useEffect(() => {
@@ -81,15 +120,17 @@ export const useUsers = (initialSession: Session | null) => {
     if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
       const user = selectedCustomers[0];
       setSelectedUserTmp(
-        { ...user, password: '',
-        lastLogin: new Date(),
-        createdTime: new Date(),
-        createdBy: '',
-        updatedTime: new Date(),
-        updatedBy: '',
-        deletedTime: new Date(),
-        deletedBy: '',
-        deletedFlag: 0, });
+        {
+          ...user, password: '',
+          lastLogin: new Date(),
+          createdTime: new Date(),
+          createdBy: '',
+          updatedTime: new Date(),
+          updatedBy: '',
+          deletedTime: new Date(),
+          deletedBy: '',
+          deletedFlag: 0,
+        });
     } else {
       setSelectedUserTmp(initialStateUser);
     }
@@ -103,7 +144,7 @@ export const useUsers = (initialSession: Session | null) => {
         Object.values(user).some(value =>
           value && value.toString().toLowerCase().includes(searchValue.toLowerCase())
         )
-      ) || []; 
+      ) || [];
       setUsers(filteredUsers);
     }
   }, [searchValue, initialUsers]);
@@ -137,8 +178,9 @@ export const useUsers = (initialSession: Session | null) => {
     handleUpdate,
     onSelectionChange,
     onSelectAllChange,
-    searchValue, 
-    setSearchValue
+    searchValue,
+    setSearchValue,
+    errors,
   };
 };
 

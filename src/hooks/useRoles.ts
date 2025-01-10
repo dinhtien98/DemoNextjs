@@ -140,7 +140,7 @@ export const useRoles = (initialSession: Session | null) => {
         onSelectionChange,
         onSelectAllChange,
         searchValue,
-        setSearchValue
+        setSearchValue,
     };
 };
 

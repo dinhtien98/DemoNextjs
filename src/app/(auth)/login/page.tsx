@@ -15,11 +15,12 @@ export default function LoginPage() {
     try {
       const response = await signIn('credentials', {
         userName: formData.get('userName'),
-        password: formData.get('password')
+        password: formData.get('password'),
+        redirect: false,
       })
 
       if (response?.error) {
-        setError('Invalid credentials')
+        setError(response.error);
         return
       }
 

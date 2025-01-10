@@ -77,6 +77,11 @@ export default function treePage({ session: initialSession }: SessionProp) {
                 command: () => {
                     setSelectedPageTmp((prev) => ({
                         ...prev,
+                        code:'',
+                        name:'',
+                        url:'',
+                        icon:'',
+                        actionCode: [],
                         parentCode: node.code,
                         level: (node.level || 0) + 1,
                     }));

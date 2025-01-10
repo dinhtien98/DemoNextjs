@@ -51,7 +51,7 @@ export const usePages = (initialSession: Session | null) => {
 
   const handleAdd = async () => {
     if (session?.user?.token) {
-      if (validateFields()) {
+      if (validateFields('add')) {
         await fetchPostData(session.user.token, endpointPage, selectedPageTmp);
         setVisible(false);
         get_Page();
@@ -61,7 +61,7 @@ export const usePages = (initialSession: Session | null) => {
 
   const handleUpdate = async () => {
     if (session?.user?.token) {
-      if (validateFields()) {
+      if (validateFields('update')) {
         await fetchPutData(session.user.token, endpointPage, seletedID, selectedPageTmp);
         setSelectedID('');
         setVisible(false);
@@ -70,21 +70,20 @@ export const usePages = (initialSession: Session | null) => {
     }
   };
 
-  const validateFields = () => {
+  const validateFields = (key: string) => {
     const newErrors: { [key: string]: string } = {};
 
-
-    const duplicateCode = pages?.some(page => page.code === selectedPageTmp.code && page.code !== selectedPageTmp.code);
-    if (duplicateCode) {
-      newErrors.code = "Page Code already exists.";
+    if (key === 'add') {
+      const duplicateCode = pages?.some(page => page.code === selectedPageTmp.code);
+      if (duplicateCode) {
+        newErrors.code = "Page Code already exists.";
+      }
+      const duplicateUrl = pages?.some(page => page.url === selectedPageTmp.url);
+      if (duplicateUrl) {
+        newErrors.url = "Page URL already exists.";
+      }
     }
-
-    const duplicateURL = pages?.some(page => page.url === selectedPageTmp.url && page.url !== selectedPageTmp.url);
-    if (duplicateURL) {
-      newErrors.url = "Page URL already exists.";
-    }
-
-
+    
     if (!selectedPageTmp.code) {
       newErrors.code = "Page Code is required.";
     }

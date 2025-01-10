@@ -54,7 +54,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                                 value={selectedRoleTmp?.code ?? ''}
                                                 onChange={(e) => {
                                                     if (selectedRoleTmp) {
-                                                        setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value });
+                                                        setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value});
                                                     }
                                                 }}
                                                 className="p-inputtext p-inputtext-lg"
@@ -73,7 +73,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                             value={selectedRoleTmp?.name || ''}
                                             onChange={(e) => {
                                                 if (selectedRoleTmp) {
-                                                    setSelectedRoleTmp({ ...selectedRoleTmp, name: e.target.value });
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, name: e.target.value, deletedBy:'', deletedTime: new Date(), updatedBy:'', updatedTime: new Date() });
                                                 }
                                             }}
                                             className="p-inputtext p-inputtext-lg"

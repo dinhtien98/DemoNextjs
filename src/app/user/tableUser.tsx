@@ -31,6 +31,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
         onSelectAllChange,
         setSearchValue,
         searchValue,
+        errors,
     } = useUsers(initialSession);
     const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
 
@@ -181,6 +182,29 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                         : ""}
                                 </div>
                             )}
+                            {errors.userName && <small className="p-error">{errors.userName}</small>}
+                        </div>
+
+                        <div className="field w-2/6 p-2">
+                            <label htmlFor="password">Password</label>
+                            {!isEdit ? (
+                                <InputText
+                                    id="password"
+                                    type="password"
+                                    tooltip="Enter your password"
+                                    value={selectedUserTmp?.password || ""}
+                                    onChange={(e) =>
+                                        selectedUserTmp &&
+                                        setSelectedUserTmp({
+                                            ...selectedUserTmp,
+                                            password: e.target.value,
+                                        })
+                                    }
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            ) : (<></>
+                            )}
+                            {errors.password && <small className="p-error">{errors.password}</small>}
                         </div>
 
                         <div className="field w-2/6 p-2">
@@ -195,10 +219,13 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                     setSelectedUserTmp({
                                         ...selectedUserTmp,
                                         fullName: e.target.value,
+                                        inDate:'',
+                                        outDate:'',
                                     })
                                 }
                                 className="p-inputtext p-inputtext-lg"
                             />
+                            {errors.fullName && <small className="p-error">{errors.fullName}</small>}
                         </div>
 
                         <div className="field w-2/6 p-2">
@@ -217,6 +244,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                 }
                                 className="p-inputtext p-inputtext-lg"
                             />
+                            {errors.email && <small className="p-error">{errors.email}</small>}
                         </div>
 
                         <div className="field w-2/6 p-2">
@@ -235,6 +263,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                 }
                                 className="p-inputtext p-inputtext-lg"
                             />
+                            {errors.avatar && <small className="p-error">{errors.avatar}</small>}
                         </div>
 
                         <div className="field w-2/6 p-2">
