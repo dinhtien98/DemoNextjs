@@ -21,6 +21,28 @@ export const fetchGetData = async (token: string, endpoint: string) => {
     }
 };
 
+export const fetchGetDataByID = async (token: string, endpoint: string, id: string) => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${endpoint}/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+};
+
 export const fetchPostData = async (token: string, endpoint: string, data: any) => {
 
     try {

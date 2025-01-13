@@ -10,12 +10,14 @@ import { MultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useRoles } from '@/hooks/useRoles';
+import { formatDate } from '@/_utils/dateUtils';
 
 export default function tableRole({ session: initialSession }: SessionProp) {
     const {
         roles,
         selectedCustomers,
         pages,
+        users,
         actions,
         selectedRoleTmp,
         setSelectedRoleTmp,
@@ -34,7 +36,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
     } = useRoles(initialSession);
     const pageProps = pages?.map((page) => ({ code: page.code }));
     const actionProps = actions?.map((action) => ({ code: action.actionCode }));
-    
+
     return (
         <div className="w-full p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2">
             <div className="p-4 w-full bg-white ">
@@ -54,7 +56,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                                 value={selectedRoleTmp?.code ?? ''}
                                                 onChange={(e) => {
                                                     if (selectedRoleTmp) {
-                                                        setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value});
+                                                        setSelectedRoleTmp({ ...selectedRoleTmp, code: e.target.value });
                                                     }
                                                 }}
                                                 className="p-inputtext p-inputtext-lg"
@@ -70,10 +72,10 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                             id="roleName"
                                             type="text"
                                             tooltip="Enter your Role Name"
-                                            value={selectedRoleTmp?.name || ''}
+                                            value={selectedRoleTmp?.name ?? ''}
                                             onChange={(e) => {
                                                 if (selectedRoleTmp) {
-                                                    setSelectedRoleTmp({ ...selectedRoleTmp, name: e.target.value, deletedBy:'', deletedTime: new Date(), updatedBy:'', updatedTime: new Date() });
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, name: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
                                                 }
                                             }}
                                             className="p-inputtext p-inputtext-lg"
@@ -84,10 +86,10 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                         <label htmlFor="pageCode">Pages</label>
                                         <MultiSelect
                                             id="pageCode"
-                                            value={selectedRoleTmp?.pageCode}
+                                            value={selectedRoleTmp?.pageCode ?? []}
                                             onChange={(e: MultiSelectChangeEvent) => {
                                                 if (selectedRoleTmp) {
-                                                    setSelectedRoleTmp({ ...selectedRoleTmp, pageCode: e.value });
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, pageCode: e.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
                                                 }
                                             }}
                                             options={pageProps}
@@ -104,10 +106,10 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                         <label htmlFor="actionCode">Actions</label>
                                         <MultiSelect
                                             id="actionCode"
-                                            value={selectedRoleTmp?.actionCode}
+                                            value={selectedRoleTmp?.actionCode ?? []}
                                             onChange={(e: MultiSelectChangeEvent) => {
                                                 if (selectedRoleTmp) {
-                                                    setSelectedRoleTmp({ ...selectedRoleTmp, actionCode: e.value });
+                                                    setSelectedRoleTmp({ ...selectedRoleTmp, actionCode: e.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
                                                 }
                                             }}
                                             options={actionProps}
@@ -213,7 +215,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                                                     key={page.code}
                                                                     className="mx-1 justify-center flex items-center"
                                                                 >
-                                                                    {rowData.actionCode?.some(
+                                                                    {rowData.pageCode?.some(
                                                                         (pc: { code: string }) =>
                                                                             pc.code === page.code
                                                                     ) ? (
@@ -261,12 +263,56 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                                                             <i className="pi pi-times text-red-500" />
                                                                         </div>
                                                                     )}
-                                                                    {action.actionCode}
+                                                                    {action.actionCode === 'V' && <i className="pi pi-eye text-blue-500 mx-1" />}
+                                                                    {action.actionCode === 'A' && <i className="pi pi-plus text-green-500 mx-1" />}
+                                                                    {action.actionCode === 'E' && <i className="pi pi-pen-to-square text-yellow-500 mx-1" />}
+                                                                    {action.actionCode === 'D' && <i className="pi pi-trash text-red-500 mx-1" />}
                                                                 </div>
                                                             ))}
                                                     </div>
                                                 )}
                                                 style={{ minWidth: '6rem' }}
+                                            />
+                                        );
+                                    }
+
+                                    if (['createdTime', 'updatedTime', 'deletedTime'].includes(key)) {
+                                        return (
+                                            <Column
+                                                key={key}
+                                                field={key}
+                                                header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                                body={(rowData) => (
+                                                    <>
+                                                        {formatDate(rowData[key], 'HH:MM')}
+                                                        <br />
+                                                        {formatDate(rowData[key], 'dd-mm-yyyy')}
+                                                    </>
+                                                )}
+                                                style={{ minWidth: '6rem', maxWidth: '15rem' }}
+                                            />
+                                        );
+                                    }
+
+                                    if (['createdBy', 'updatedBy', 'deletedBy'].includes(key)) {
+                                        return (
+                                            <Column
+                                                key={key}
+                                                field={key}
+                                                header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                                body={(rowData) => {
+                                                    const user = users?.find((u) => u.id == rowData[key]);
+                                                    return (
+                                                        <div className="flex items-center">
+                                                            {user ? (
+                                                                <span>{user.userName}</span>
+                                                            ) : (
+                                                                <span className="text-gray-500">Unknown</span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                }}
+                                                style={{ minWidth: '6rem', maxWidth: '15rem' }}
                                             />
                                         );
                                     }

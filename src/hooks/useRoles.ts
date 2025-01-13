@@ -7,6 +7,7 @@ import { DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } 
 
 export const useRoles = (initialSession: Session | null) => {
     const [session, setSession] = useState<Session | null>(initialSession);
+    const [users, setUsers] = useState<Users[] | null>(null);
     const [roles, setRoles] = useState<Roles[] | null>(null);
     const [initialRoles, setInitialRoles] = useState<Roles[] | null>(null);
     const [pages, setPages] = useState<Page[] | null>(null);
@@ -21,6 +22,7 @@ export const useRoles = (initialSession: Session | null) => {
     const endpointPage = 'authPage';
     const endpointRole = 'authRole';
     const endpointAction = 'AuthAction';
+    const endpointUser = 'authUser';
 
     const get_Session = async () => {
         const sessionData = await getServerSession(authOptions);
@@ -48,6 +50,13 @@ export const useRoles = (initialSession: Session | null) => {
             setActions(action);
         }
     };
+
+    const get_User = async () => {
+        if (session?.user?.token) {
+          const user = await fetchGetData(session.user.token, endpointUser);
+          setUsers(user);
+        }
+      };
 
     const handleDelete = async () => {
         const ids = selectedCustomers ? selectedCustomers.map(roles => roles.id) : [];
@@ -85,6 +94,7 @@ export const useRoles = (initialSession: Session | null) => {
         get_Page();
         get_Role();
         get_Action();
+        get_User();
     }, [initialSession]);
 
     useEffect(() => {
@@ -141,6 +151,7 @@ export const useRoles = (initialSession: Session | null) => {
         onSelectAllChange,
         searchValue,
         setSearchValue,
+        users
     };
 };
 
@@ -157,3 +168,4 @@ const initialStateRole: RoleTmp = {
     pageCode: [],
     actionCode: []
 };
+

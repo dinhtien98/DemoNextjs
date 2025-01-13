@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
                     }
 
                     return {
-                        id: responseData.data.userId,
+                        id: responseData.data.id,
                         token: responseData.data.token,
                         fullName: responseData.data.fullName,
                     };

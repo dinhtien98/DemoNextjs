@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +12,7 @@ import 'primeicons/primeicons.css';
 
 
 export default function Header() {
+  
   const handleSignOut = async () => {
     try {
       await signOut({ redirect: false });

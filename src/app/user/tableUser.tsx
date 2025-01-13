@@ -10,6 +10,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { MultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
 import { useUsers } from '@/hooks/useUsers';
+import { formatDate } from '@/_utils/dateUtils';
 
 
 export default function tableUser({ session: initialSession }: SessionProp) {
@@ -129,6 +130,46 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                         />
                                     )
                                 }
+                                if (['createdTime', 'updatedTime', 'deletedTime', 'inDate', 'outDate'].includes(key)) {
+                                    return (
+                                        <Column
+                                            key={key}
+                                            field={key}
+                                            header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                            body={(rowData) => (
+                                                <>
+                                                    {formatDate(rowData[key], 'HH:MM')}
+                                                    <br />
+                                                    {formatDate(rowData[key], 'dd-mm-yyyy')}
+                                                </>
+                                            )}
+                                            style={{ minWidth: '6rem', maxWidth: '15rem' }}
+                                        />
+                                    );
+                                }
+                                if (['createdBy', 'updatedBy', 'deletedBy'].includes(key)) {
+                                    return (
+                                        <Column
+                                            key={key}
+                                            field={key}
+                                            header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                            body={(rowData) => {
+                                                const user = users?.find((u) => u.id == rowData[key]);
+                                                return (
+                                                    <div className="flex items-center">
+                                                        {user ? (
+                                                            <span>{user.userName}</span> 
+                                                        ) : (
+                                                            <span className="text-gray-500">Unknown</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }}
+                                            style={{ minWidth: '6rem', maxWidth: '15rem' }}
+                                        />
+                                    );
+                                }
+                                
                                 return (
                                     <Column
                                         key={`column-${key}-${index}`}
@@ -219,8 +260,8 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                     setSelectedUserTmp({
                                         ...selectedUserTmp,
                                         fullName: e.target.value,
-                                        inDate:'',
-                                        outDate:'',
+                                        inDate: '',
+                                        outDate: '',
                                     })
                                 }
                                 className="p-inputtext p-inputtext-lg"
@@ -240,6 +281,8 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                     setSelectedUserTmp({
                                         ...selectedUserTmp,
                                         email: e.target.value,
+                                        inDate: '',
+                                        outDate: '',
                                     })
                                 }
                                 className="p-inputtext p-inputtext-lg"
@@ -259,6 +302,8 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                     setSelectedUserTmp({
                                         ...selectedUserTmp,
                                         avatar: e.target.value,
+                                        inDate: '',
+                                        outDate: '',
                                     })
                                 }
                                 className="p-inputtext p-inputtext-lg"
@@ -273,7 +318,11 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                 value={selectedUserTmp?.roleCode}
                                 onChange={(e: MultiSelectChangeEvent) =>
                                     selectedUserTmp &&
-                                    setSelectedUserTmp({ ...selectedUserTmp, roleCode: e.value })
+                                    setSelectedUserTmp({
+                                        ...selectedUserTmp, roleCode: e.value,
+                                        inDate: '',
+                                        outDate: '',
+                                    })
                                 }
                                 options={rolesProps}
                                 optionLabel="code"

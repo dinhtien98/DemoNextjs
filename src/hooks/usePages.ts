@@ -20,6 +20,7 @@ export const usePages = (initialSession: Session | null) => {
 
   const endpointPage = 'authPage';
   const endpointAction = 'AuthAction';
+  const endpointPermissionUser = 'authPermissonUser';
 
   const get_Session = async () => {
     const sessionData = await getServerSession(authOptions);
@@ -28,7 +29,7 @@ export const usePages = (initialSession: Session | null) => {
 
   const get_Page = async () => {
     if (session?.user?.token) {
-      const page = await fetchGetData(session.user.token, endpointPage);
+      const page = await fetchGetData(session.user.token, endpointPermissionUser);
       setPages(page);
       setinitialPages(page);
     }
