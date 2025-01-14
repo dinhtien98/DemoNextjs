@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
@@ -11,6 +12,7 @@ import { InputText } from 'primereact/inputtext';
 import { MultiSelect, MultiSelectChangeEvent } from 'primereact/multiselect';
 import { useUsers } from '@/hooks/useUsers';
 import { formatDate } from '@/_utils/dateUtils';
+import { Dropdown } from 'primereact/dropdown';
 
 
 export default function tableUser({ session: initialSession }: SessionProp) {
@@ -35,7 +37,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
         errors,
     } = useUsers(initialSession);
     const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
-
+    
     return (
         <div className="w-full p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2">
             <div className="p-4 w-full bg-white ">
@@ -102,35 +104,27 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                             header="RoleCode"
                                             body={(rowData) => (
                                                 <div className="flex">
-                                                    {roles &&
-                                                        roles.length > 0 &&
-                                                        roles.map((role, roleIndex) => (
-                                                            <div
-                                                                key={`role-${role.code}-${roleIndex}`}
-                                                                className="mx-1 justify-center flex items-center"
-                                                            >
-                                                                {rowData.roleCode?.some(
-                                                                    (rc: { code: string }) =>
-                                                                        rc.code === role.code
-                                                                ) ? (
-                                                                    <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
-                                                                        <i className="pi pi-check text-green-500" />
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
-                                                                        <i className="pi pi-times text-red-500" />
-                                                                    </div>
-                                                                )}
-                                                                {role.code}
-                                                            </div>
-                                                        ))}
+                                                    <Dropdown
+                                                        value={rowData.roleCode?.[0]?.code}  
+                                                        options={rowData.roleCode?.map((role: any) => ({
+                                                            label: role.code,  
+                                                            value: role.code   
+                                                        })) || []}  
+                                                        optionLabel="label"  
+                                                        optionValue="value"  
+                                                        placeholder="RoleCode"
+                                                        className="w-full"
+                                                    />
                                                 </div>
                                             )}
                                             style={{ minWidth: '6rem' }}
                                         />
-                                    )
+                                    );
                                 }
-                                if (['createdTime', 'updatedTime', 'deletedTime', 'inDate', 'outDate'].includes(key)) {
+
+
+
+                                if (['createdTime', 'updatedTime', 'deletedTime', 'inDate', 'outDate', 'lastLogin'].includes(key)) {
                                     return (
                                         <Column
                                             key={key}
@@ -158,7 +152,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                                 return (
                                                     <div className="flex items-center">
                                                         {user ? (
-                                                            <span>{user.userName}</span> 
+                                                            <span>{user.userName}</span>
                                                         ) : (
                                                             <span className="text-gray-500">Unknown</span>
                                                         )}
@@ -169,7 +163,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                         />
                                     );
                                 }
-                                
+
                                 return (
                                     <Column
                                         key={`column-${key}-${index}`}

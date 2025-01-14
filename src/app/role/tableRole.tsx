@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
@@ -11,6 +12,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useRoles } from '@/hooks/useRoles';
 import { formatDate } from '@/_utils/dateUtils';
+import { Dropdown } from 'primereact/dropdown';
 
 export default function tableRole({ session: initialSession }: SessionProp) {
     const {
@@ -200,36 +202,24 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                             {roles &&
                                 roles.length > 0 &&
                                 Object.keys(roles[0]).map((key) => {
-
-                                    if (key === 'pageCode') {
+                                    if (key === "pageCode") {
                                         return (
                                             <Column
                                                 key={key}
                                                 header="PageCode"
                                                 body={(rowData) => (
                                                     <div className="flex">
-                                                        {pages &&
-                                                            pages.length > 0 &&
-                                                            pages.map((page) => (
-                                                                <div
-                                                                    key={page.code}
-                                                                    className="mx-1 justify-center flex items-center"
-                                                                >
-                                                                    {rowData.pageCode?.some(
-                                                                        (pc: { code: string }) =>
-                                                                            pc.code === page.code
-                                                                    ) ? (
-                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
-                                                                            <i className="pi pi-check text-green-500" />
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
-                                                                            <i className="pi pi-times text-red-500" />
-                                                                        </div>
-                                                                    )}
-                                                                    {page.code}
-                                                                </div>
-                                                            ))}
+                                                        <Dropdown
+                                                            value={rowData.pageCode?.[0]?.code}
+                                                            options={rowData.pageCode?.map((role: any) => ({
+                                                                label: role.code,
+                                                                value: role.code
+                                                            })) || []}
+                                                            optionLabel="label"
+                                                            optionValue="value"
+                                                            placeholder="PageCode"
+                                                            className="w-full"
+                                                        />
                                                     </div>
                                                 )}
                                                 style={{ minWidth: '6rem' }}
@@ -252,15 +242,14 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                                                     className="mx-1 justify-center flex items-center"
                                                                 >
                                                                     {rowData.actionCode?.some(
-                                                                        (ac: { code: string }) =>
-                                                                            ac.code === action.actionCode
+                                                                        (ac: { code: string }) => ac.code === action.actionCode
                                                                     ) ? (
-                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
-                                                                            <i className="pi pi-check text-green-500" />
+                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-full flex items-center justify-center" style={{ width: '16px', height: '16px' }}>
+                                                                            <i className="pi pi-check text-green-500 pi-sm" style={{ fontSize: '12px', lineHeight: '16px' }}/> 
                                                                         </div>
                                                                     ) : (
-                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-lg">
-                                                                            <i className="pi pi-times text-red-500" />
+                                                                        <div className="border border-0.7 border-solid p-1 mx-1 rounded-full flex items-center justify-center" style={{ width: '16px', height: '16px' }}>
+                                                                            <i className="pi pi-times text-red-500 pi-sm" style={{ fontSize: '12px', lineHeight: '16px' }}/>
                                                                         </div>
                                                                     )}
                                                                     {action.actionCode === 'V' && <i className="pi pi-eye text-blue-500 mx-1" />}

@@ -7,7 +7,7 @@ export default async function pageUser() {
     const session: Session | null = await getServerSession(authOptions);
     return (
         <div>
-            {session ?<TableUser session={session} /> : <LoginPage />}
+            {session ?<TableUser session={session} /> : <LoginPage/>}
         </div>
     )
 }

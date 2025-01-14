@@ -11,7 +11,7 @@ export default async function page() {
     return (
         <div>
             {/* {session ? <TablePage session={session} /> : <LoginPage />} */}
-            {session ? <TreePage session={session} /> : <LoginPage />}
+            {session ? <TreePage session={session} /> : <LoginPage/>}
         </div>
     )
 }

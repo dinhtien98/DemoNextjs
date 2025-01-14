@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 
 'use client';
 
@@ -9,18 +11,29 @@ import { signOut } from 'next-auth/react';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
+import { useUserData } from '@/hooks/useUserData';
 
 
-export default function Header() {
-  
+export default function Header({ session }: SessionProp) {
+  const { selectedUserTmp, handleUpdate } = useUserData(session);
+
+  useEffect(() => {
+  }, [selectedUserTmp]);
+
   const handleSignOut = async () => {
     try {
+      updateUserToNotFirstLogin();
       await signOut({ redirect: false });
       window.location.href = '/login';
     } catch (error) {
       console.error('Error during sign out:', error)
     }
   }
+
+  const updateUserToNotFirstLogin = () => {
+    handleUpdate(0);
+  };
+
 
   const start = <Link href="/" passHref><div className='text-black hover:text-blue-900 font-bold text-xl'>DEMO NEXTJS</div></Link>;
 
@@ -30,8 +43,8 @@ export default function Header() {
         <i className="pi pi-user"></i>
       </Button>
       <Button type="button" className="p-link layout-topbar-button" onClick={handleSignOut}>
-          <i className="pi pi-sign-out"></i>
-        </Button>
+        <i className="pi pi-sign-out"></i>
+      </Button>
     </div>
   );
 

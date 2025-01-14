@@ -6,11 +6,9 @@ import Dashboard from './dashboard';
 
 export default async function Home() {
   const session: Session | null = await getServerSession(authOptions);
-  
-
   return (
     <>
-      {!session ? <LoginPage /> : <Dashboard session={session}/>}
+      {!session ? <LoginPage/> : <Dashboard session={session}/>}
     </>
   )
 }

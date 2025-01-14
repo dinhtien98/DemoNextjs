@@ -7,6 +7,7 @@ import LoginPage from '../(auth)/login/page';
 export default async function page() {
     const session: Session | null = await getServerSession(authOptions);
   return (
-    <div>{session ?<TableRole session={session} /> : <LoginPage />}</div>
+    <div>{session ?<TableRole session={session} /> : <LoginPage/>}</div>
+    
   )
 }

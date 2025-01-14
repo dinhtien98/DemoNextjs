@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { getServerSession, Session } from 'next-auth';
 import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData } from '@/services/apis';
@@ -29,7 +30,7 @@ export const usePages = (initialSession: Session | null) => {
 
   const get_Page = async () => {
     if (session?.user?.token) {
-      const page = await fetchGetData(session.user.token, endpointPermissionUser);
+      const page = await fetchGetData(session.user.token, endpointPage);
       setPages(page);
       setinitialPages(page);
     }
