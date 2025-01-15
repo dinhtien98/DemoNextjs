@@ -19,6 +19,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
 }
 
 .header {
@@ -145,4 +146,8 @@ body {
 
 .p-tree .p-treenode-content.level-3 {
   margin-left: 60px;
+}
+
+.custom-width {
+  width: calc(100vw - 15%);
 }

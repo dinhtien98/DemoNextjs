@@ -18,6 +18,7 @@ export const usePages = (initialSession: Session | null) => {
   const [searchValue, setSearchValue] = useState('');
   const [seletedID, setSelectedID] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [pagesPermission, setPagesPermission] = useState<Pages[] | null>(null);
 
   const endpointPage = 'authPage';
   const endpointAction = 'AuthAction';
@@ -30,16 +31,23 @@ export const usePages = (initialSession: Session | null) => {
 
   const get_Page = async () => {
     if (session?.user?.token) {
-      const page = await fetchGetData(session.user.token, endpointPage);
-      setPages(page);
-      setinitialPages(page);
+      const pages = await fetchGetData(session.user.token, endpointPage);
+      setPages(pages);
+      setinitialPages(pages);
+    }
+  };
+
+  const get_Page_permission_user = async () => {
+    if (session?.user?.token) {
+      const pages = await fetchGetData(session.user.token, endpointPermissionUser);
+      setPagesPermission(pages);
     }
   };
 
   const get_Action = async () => {
     if (session?.user?.token) {
-      const action = await fetchGetData(session.user.token, endpointAction);
-      setActions(action);
+      const actions = await fetchGetData(session.user.token, endpointAction);
+      setActions(actions);
     }
   };
 
@@ -112,6 +120,7 @@ export const usePages = (initialSession: Session | null) => {
     }
     get_Page();
     get_Action();
+    get_Page_permission_user();
   }, [initialSession]);
 
   useEffect(() => {
@@ -162,6 +171,7 @@ export const usePages = (initialSession: Session | null) => {
     setSelectedID,
     errors,
     setErrors,
+    pagesPermission
   };
 };
 

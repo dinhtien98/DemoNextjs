@@ -1,69 +1,88 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-html-link-for-pages */
 'use client';
 
-import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import React from 'react';
+import { usePages } from '@/hooks/usePages';
+import { useRouter } from 'next/navigation';
+import { Tree } from 'primereact/tree';
+import { TreeNode } from 'primereact/treenode';
 
-export default function SideBar() {
-  const [visible, setVisible] = useState(false);
-  const pathname = usePathname();
+interface CustomTreeNode extends TreeNode {
+  url?: string;
+}
 
-  const isActive = (path: string) => pathname === path;
+export default function SideBar({ session: initialSession }: SessionProp) {
+  const router = useRouter();
+  const { pagesPermission } = usePages(initialSession);
 
-  const isLoginPage = pathname === "/login";
- 
+  const buildTreeData = (data: any[], level = 0) => {
+    if (!Array.isArray(data)) {
+      console.error('Invalid data: Expected an array, but got:', data);
+      return [];
+    }
+
+    const map = new Map();
+    const roots: any[] = [];
+
+    data.forEach((item) => {
+      map.set(item.code, {
+        ...item,
+        key: item.code,
+        label: item.name,
+        url: item.url,
+        children: [],
+        level,
+        className: `level-${level}`,
+      });
+    });
+
+    data.forEach((item) => {
+      if (item.parentCode) {
+        const parent = map.get(item.parentCode);
+        if (parent) {
+          const childNode = map.get(item.code);
+          childNode.level = parent.level + 1;
+          childNode.className = `level-${childNode.level}`;
+          parent.children.push(childNode);
+        }
+      } else {
+        roots.push(map.get(item.code));
+      }
+    });
+
+    return roots;
+  };
+
+  const handleNodeClick = (node: CustomTreeNode) => {
+    if (node.url) {
+      router.push(node.url);
+    } else {
+      console.warn('Selected node does not have a URL:', node);
+    }
+  };
+
+  const nodeTemplate = (node: CustomTreeNode, options: any) => {
+    return (
+      <div
+        className={`node-label ${options.className}`}
+        onClick={() => handleNodeClick(node)}
+        style={{ cursor: node.url ? 'pointer' : 'default', color: node.url ? 'black' : 'inherit' }}
+      >
+        {node.label}
+      </div>
+    );
+  };
+
+  const treeData = buildTreeData(pagesPermission || []);
 
   return (
-    <>
-      {!isLoginPage &&
-        <div
-          className={`p-4 bg-white shadow-lg rounded-lg fixed top-0 left-0 z-10 transition-transform transform ${visible ? 'translate-x-0' : '-translate-x-full'
-            } md:translate-x-0 md:static md:w-1/6 h-full`}
-        >
-          <div className="font-bold mb-4">
-            <a
-              href="/"
-              className={`text-black hover:text-blue-700 ${isActive('/') ? 'text-blue-700' : ''
-                }`}
-              onClick={() => setVisible(false)}
-            >
-              <i className="pi pi-home mr-2"></i>Dashboard
-            </a>
-          </div>
-          <ul className="menu text-lg font-bold">
-            <li className="menu-item p-2">
-              <a
-                href="/user"
-                className={`text-black hover:text-blue-700 ${isActive('/user') ? 'text-blue-700' : ''
-                  }`}
-                onClick={() => setVisible(false)}
-              >
-                <i className="pi pi-user mr-2"></i>User
-              </a>
-            </li>
-            <li className="menu-item p-2">
-              <a
-                href="/page"
-                className={`text-black hover:text-blue-700 ${isActive('/page') ? 'text-blue-700' : ''
-                  }`}
-                onClick={() => setVisible(false)}
-              >
-                <i className="pi pi-file mr-2"></i>Page
-              </a>
-            </li>
-            <li className="menu-item p-2">
-              <a
-                href="/role"
-                className={`text-black hover:text-blue-700 ${isActive('/role') ? 'text-blue-700' : ''
-                  }`}
-                onClick={() => setVisible(false)}
-              >
-                <i className="pi pi-users mr-2"></i>Role
-              </a>
-            </li>
-          </ul>
-        </div>
-      }
-    </>
+    <div className="tree-container">
+      <Tree
+        value={treeData}
+        className="tree-container"
+        nodeTemplate={nodeTemplate}
+      />
+    </div>
   );
 }

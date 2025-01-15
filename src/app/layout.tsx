@@ -8,7 +8,6 @@ import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "primereact/resources/primereact.min.css";
 import 'primeicons/primeicons.css';
 import Header from "@/layouts/header";
-import SideBar from "@/layouts/sideBar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 
@@ -32,10 +31,7 @@ export default async function RootLayout({
         <PrimeReactProvider>
           <div className="w-full">
             <Header session={session} />
-            <div className="flex w-full">
-              <SideBar/>
-              <div className="w-5/6">{children}</div>
-            </div>
+            {children}
           </div>
           <Footer />
         </PrimeReactProvider>

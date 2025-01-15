@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
+import { loginService } from '@/services/loginService'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
@@ -26,6 +27,7 @@ export default function LoginPage() {
         return
       }
 
+      loginService.triggerLogin(1);
       window.location.href = '/'
     } catch (error) {
       setError('An error occurred during login')
