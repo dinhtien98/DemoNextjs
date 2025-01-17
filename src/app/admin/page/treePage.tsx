@@ -152,7 +152,7 @@ export default function treePage({ session: initialSession }: SessionProp) {
 
     return (
         <div className="flex w-full">
-            <div className="flex-none! w-1/5! bg-white"><SideBar session={initialSession} /></div>
+            <div className="flex-none! w-1/4! bg-white"><SideBar session={initialSession} /></div>
             <div className="flex-grow! bg-white">
                 <div className="w-full p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2">
                     <div className="w-full p-4 bg-white ">

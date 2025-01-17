@@ -4,7 +4,7 @@ import { useUserData } from '@/hooks/useUserData';
 import { loginService } from '@/services/loginService';
 import SideBar from '@/layouts/sideBar';
 
-export default function Dashboard({ session : initialSession }: SessionProp) {
+export default function AdminPage({ session : initialSession }: SessionProp) {
     const { selectedUserTmp, handleUpdate } = useUserData(initialSession);
 
     useEffect(() => {

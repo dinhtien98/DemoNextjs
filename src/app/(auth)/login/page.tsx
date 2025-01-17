@@ -1,15 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @next/next/no-async-client-component */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import { loginService } from '@/services/loginService'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { getSession, signIn } from 'next-auth/react'
 import { FormEvent, useState } from 'react'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -26,12 +25,23 @@ export default function LoginPage() {
         setError(response.error);
         return
       }
-
       loginService.triggerLogin(1);
-      window.location.href = '/'
+      const session = await getSession()
+      console.log('session:', session?.user?.roleCode)
+      const roleCodeArray = Array.isArray(session?.user?.roleCode) ? session.user.roleCode : [];
+
+      if (roleCodeArray.some((item: any) => item.code === 'role_user')) {
+        window.location.href = '/';
+      } else {
+        window.location.href = '/admin';
+      }
     } catch (error) {
       setError('An error occurred during login')
     }
+  }
+
+  const handleRegister = () =>{
+    window.location.href = '/register';
   }
 
   return (
@@ -83,6 +93,12 @@ export default function LoginPage() {
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Sign in
+            </button>
+            <button
+              onClick={()=>handleRegister()}
+              className="group relative w-full flex justify-center py-2 px-4 mt-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Sign up
             </button>
           </div>
         </form>

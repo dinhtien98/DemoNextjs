@@ -42,7 +42,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
 
     return (
         <div className="flex w-screen overflow-hidden">
-            <div className="flex-none! w-1/5! bg-white"><SideBar session={initialSession} /></div>
+            <div className="flex-none! w-1/4! bg-white"><SideBar session={initialSession} /></div>
             <div className="flex-grow! bg-white">
                 <div className="p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2 ">
                     <div className="p-4 bg-white">

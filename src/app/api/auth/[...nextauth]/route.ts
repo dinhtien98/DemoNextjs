@@ -7,6 +7,7 @@ declare module "next-auth" {
         fullName?: string;
         token?: string;
         id?: string;
+        roleCode?: JSON
     }
 
     interface Session {
@@ -16,6 +17,7 @@ declare module "next-auth" {
             id?: string;
             fullName?: string;
             token?: string;
+            roleCode?: JSON
         };
     }
 }
@@ -59,6 +61,7 @@ export const authOptions: NextAuthOptions = {
                         id: responseData.data.id,
                         token: responseData.data.token,
                         fullName: responseData.data.fullName,
+                        roleCode: responseData.data.roleCode,
                     };
                 } catch (error) {
                     if (error instanceof Error) {
@@ -79,6 +82,7 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id;
                 token.token = user.token;
                 token.fullName = user.fullName;
+                token.roleCode = user.roleCode;
             }
             return token;
         },
@@ -88,6 +92,7 @@ export const authOptions: NextAuthOptions = {
                 id: token.id as string,
                 fullName: token.fullName as string,
                 token: token.token as string,
+                roleCode: token.roleCode as JSON
             };
             return session;
         },

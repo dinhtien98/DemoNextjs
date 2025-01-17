@@ -139,3 +139,36 @@ interface UserTmp {
     roleCode: JSON[];
 }
 
+interface Product {
+    id: number;
+    productName: string;
+    description: string;
+    price: number;
+    stockQuantity: number;
+    category: number;
+    supplier: string;
+    createdTime: Date;
+    createdBy: string;
+    updatedTime: Date;
+    updatedBy: string;
+    deletedTime: Date;
+    deletedBy: string;
+    deletedFlag: number;
+}
+
+interface ProductTmp {
+    productName: string;
+    description: string;
+    price: number;
+    stockQuantity: number;
+    category: number;
+    supplier: string;
+    createdTime: Date;
+    createdBy: string;
+    updatedTime: Date;
+    updatedBy: string;
+    deletedTime: Date;
+    deletedBy: string;
+    deletedFlag: number;
+}
+

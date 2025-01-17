@@ -5,23 +5,19 @@ import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData } from '@/se
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } from 'primereact/datatable';
 
-export const useRoles = (initialSession: Session | null) => {
+export const useProduct = (initialSession: Session | null) => {
     const [session, setSession] = useState<Session | null>(initialSession);
+    const [product, setProduct] = useState<Product[] | null>(null);
     const [users, setUsers] = useState<Users[] | null>(null);
-    const [roles, setRoles] = useState<Roles[] | null>(null);
-    const [initialRoles, setInitialRoles] = useState<Roles[] | null>(null);
-    const [pages, setPages] = useState<Page[] | null>(null);
-    const [actions, setActions] = useState<Action[] | null>(null);
+    const [initialProduct, setInitialProduct] = useState<Product[] | null>(null);
     const [selectAll, setSelectAll] = useState<boolean>(false);
-    const [selectedCustomers, setSelectedCustomers] = useState<Roles[] | null>(null);
+    const [selectedCustomers, setSelectedCustomers] = useState<Product[] | null>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [isEdit, setIsEdit] = useState<boolean>(false);
-    const [selectedRoleTmp, setSelectedRoleTmp] = useState<RoleTmp>(initialStateRole);
+    const [selectedProductTmp, setSelectedProductTmp] = useState<ProductTmp>(initialStateProduct);
     const [searchValue, setSearchValue] = useState('');
 
-    const endpointPage = 'authPage';
-    const endpointRole = 'authRole';
-    const endpointAction = 'AuthAction';
+    const endpointProduct = 'AuthProduct';
     const endpointUser = 'authUser';
 
     const get_Session = async () => {
@@ -29,25 +25,11 @@ export const useRoles = (initialSession: Session | null) => {
         setSession(sessionData);
     };
 
-    const get_Role = async () => {
+    const get_Product = async () => {
         if (session?.user?.token) {
-            const role = await fetchGetData(session.user.token, endpointRole);
-            setRoles(role);
-            setInitialRoles(role);
-        }
-    };
-
-    const get_Page = async () => {
-        if (session?.user?.token) {
-            const page = await fetchGetData(session.user.token, endpointPage);
-            setPages(page);
-        }
-    };
-
-    const get_Action = async () => {
-        if (session?.user?.token) {
-            const action = await fetchGetData(session.user.token, endpointAction);
-            setActions(action);
+            const res = await fetchGetData(session.user.token, endpointProduct);
+            setProduct(res);
+            setInitialProduct(res);
         }
     };
 
@@ -59,12 +41,12 @@ export const useRoles = (initialSession: Session | null) => {
     };
 
     const handleDelete = async () => {
-        const ids = selectedCustomers ? selectedCustomers.map(roles => roles.id) : [];
+        const ids = selectedCustomers ? selectedCustomers.map(product => product.id) : [];
         if (ids.length > 0 && session?.user?.token) {
             for (const id of ids) {
-                await fetchDeleteData(session.user.token, endpointRole, id, selectedRoleTmp);
+                await fetchDeleteData(session.user.token, endpointProduct, id, selectedProductTmp);
             }
-            get_Role();
+            get_Product();
             setSelectedCustomers([]);
             setSelectAll(false);
         }
@@ -72,18 +54,18 @@ export const useRoles = (initialSession: Session | null) => {
 
     const handleAdd = async () => {
         if (session?.user?.token) {
-            await fetchPostData(session.user.token, endpointRole, selectedRoleTmp);
+            await fetchPostData(session.user.token, endpointProduct, selectedProductTmp);
             setVisible(false);
-            get_Role();
+            get_Product();
         }
     };
 
     const handleUpdate = async () => {
-        const id = selectedCustomers ? selectedCustomers.map(roles => roles.id) : [];
+        const id = selectedCustomers ? selectedCustomers.map(product => product.id) : [];
         if (session?.user?.token) {
-            await fetchPutData(session.user.token, endpointRole, id, selectedRoleTmp);
+            await fetchPutData(session.user.token, endpointProduct, id, selectedProductTmp);
             setVisible(false);
-            get_Role();
+            get_Product();
         }
     };
 
@@ -91,53 +73,47 @@ export const useRoles = (initialSession: Session | null) => {
         if (!initialSession) {
             get_Session();
         }
-        get_Page();
-        get_Role();
-        get_Action();
+        get_Product();
         get_User();
     }, [initialSession]);
 
     useEffect(() => {
         if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
-            const role = selectedCustomers[0];
-            setSelectedRoleTmp({ ...role })
+            const product = selectedCustomers[0];
+            setSelectedProductTmp({ ...product })
         } else {
-            setSelectedRoleTmp(initialStateRole);
+            setSelectedProductTmp(initialStateProduct);
         }
     }, [selectedCustomers, isEdit]);
 
     useEffect(() => {
         if (searchValue === '') {
-            setRoles(initialRoles);
+            setProduct(initialProduct);
         } else {
-            const filteredRoles = initialRoles?.filter(role =>
-                Object.values(role).some(value =>
+            const filteredProducts = initialProduct?.filter(product =>
+                Object.values(product).some(value =>
                     value && value.toString().toLowerCase().includes(searchValue.toLowerCase())
                 )
             ) || [];
-            setRoles(filteredRoles);
+            setProduct(filteredProducts);
         }
-    }, [searchValue, initialRoles]);
+    }, [searchValue, initialProduct]);
 
-    const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<Roles[]>) => {
+    const onSelectionChange = (event: DataTableSelectionMultipleChangeEvent<Product[]>) => {
         setSelectedCustomers(event.value);
-        setSelectAll(event.value.length === roles?.length);
+        setSelectAll(event.value.length === product?.length);
     };
 
     const onSelectAllChange = (event: DataTableSelectAllChangeEvent) => {
         setSelectAll(event.checked);
-        setSelectedCustomers(event.checked ? roles : []);
+        setSelectedCustomers(event.checked ? product : []);
     };
 
     return {
         session,
-        roles,
         selectedCustomers,
         setSelectedCustomers,
-        pages,
-        actions,
-        selectedRoleTmp,
-        setSelectedRoleTmp,
+        product,
         visible,
         setVisible,
         isEdit,
@@ -151,21 +127,25 @@ export const useRoles = (initialSession: Session | null) => {
         onSelectAllChange,
         searchValue,
         setSearchValue,
-        users
+        users,
+        setSelectedProductTmp,
+        selectedProductTmp
     };
 };
 
-const initialStateRole: RoleTmp = {
-    name: '',
-    code: '',
+const initialStateProduct: ProductTmp = {
+    productName: '',
+    description: '',
+    price: 0,
+    stockQuantity: 0,
+    category: 0,
+    supplier: '',
     createdTime: new Date(),
     createdBy: '',
     updatedTime: new Date(),
     updatedBy: '',
     deletedTime: new Date(),
     deletedBy: '',
-    deletedFlag: 0,
-    pageCode: [],
-    actionCode: []
+    deletedFlag: 0
 };
 
