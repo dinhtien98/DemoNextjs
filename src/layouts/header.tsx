@@ -11,31 +11,19 @@ import { signOut } from 'next-auth/react';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
-import { useUserData } from '@/hooks/useUserData';
 import { loginService } from '@/services/loginService';
 
 
 export default function Header({ session }: SessionProp) {
-  // const { selectedUserTmp, handleUpdate } = useUserData(session);
-
-  // useEffect(() => {
-  // }, [selectedUserTmp]);
-
   const handleSignOut = async () => {
     try {
       loginService.triggerLogin(0);
-      // updateUserToNotFirstLogin();
       await signOut({ redirect: false });
       window.location.href = '/login';
     } catch (error) {
       console.error('Error during sign out:', error)
     }
   }
-
-  // const updateUserToNotFirstLogin = () => {
-  //   handleUpdate(0);
-  // };
-
 
   const start = <Link href="/" passHref><div className='text-black hover:text-blue-900 font-bold text-xl'>DEMO NEXTJS</div></Link>;
 
@@ -50,26 +38,8 @@ export default function Header({ session }: SessionProp) {
     </div>
   );
 
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 0) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
   return (
-    <div className={`header p-2 mr-1 ${scrolled ? 'sticky-header' : ''}`}>
+    <div className={`header p-2 mr-1`}>
       <Menubar
         start={start}
         end={end}

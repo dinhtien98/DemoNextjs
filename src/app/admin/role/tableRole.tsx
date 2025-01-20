@@ -238,7 +238,6 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                 <InputText
                                     id="roleCode"
                                     type="text"
-                                    tooltip="Enter your RoleCode"
                                     value={selectedRoleTmp?.code ?? ''}
                                     onChange={(e) => {
                                         if (selectedRoleTmp) {
@@ -257,7 +256,6 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="roleName"
                                 type="text"
-                                tooltip="Enter your Role Name"
                                 value={selectedRoleTmp?.name ?? ''}
                                 onChange={(e) => {
                                     if (selectedRoleTmp) {
@@ -283,7 +281,6 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                 placeholder="Select Pages"
                                 maxSelectedLabels={3}
                                 className="w-full md:w-20rem p-multiselect-lg"
-                                tooltip="Choose Pages"
                                 selectedItemsLabel="Selected Page"
                             />
                         </div>
@@ -303,7 +300,6 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                                 placeholder="Select Actions"
                                 maxSelectedLabels={3}
                                 className="w-full md:w-20rem p-multiselect-lg"
-                                tooltip="Choose Actions"
                                 selectedItemsLabel="Selected Actions"
                             />
                         </div>

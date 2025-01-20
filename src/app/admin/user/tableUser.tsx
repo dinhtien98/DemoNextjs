@@ -220,7 +220,6 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                 <InputText
                                     id="userName"
                                     type="text"
-                                    tooltip="Enter your User Name"
                                     value={selectedUserTmp?.userName || ""}
                                     onChange={(e) =>
                                         selectedUserTmp &&
@@ -247,7 +246,6 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                 <InputText
                                     id="password"
                                     type="password"
-                                    tooltip="Enter your password"
                                     value={selectedUserTmp?.password || ""}
                                     onChange={(e) =>
                                         selectedUserTmp &&
@@ -269,7 +267,6 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="fullName"
                                 type="text"
-                                tooltip="Enter your Full Name"
                                 value={selectedUserTmp?.fullName || ""}
                                 onChange={(e) =>
                                     selectedUserTmp &&
@@ -290,7 +287,6 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="email"
                                 type="text"
-                                tooltip="Enter your Email"
                                 value={selectedUserTmp?.email || ""}
                                 onChange={(e) =>
                                     selectedUserTmp &&
@@ -311,7 +307,6 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="avatar"
                                 type="text"
-                                tooltip="Enter your Avatar"
                                 value={selectedUserTmp?.avatar || ""}
                                 onChange={(e) =>
                                     selectedUserTmp &&
@@ -346,7 +341,6 @@ export default function tableUser({ session: initialSession }: SessionProp) {
                                 placeholder="Select Roles"
                                 maxSelectedLabels={3}
                                 className="p-multiselect-lg"
-                                tooltip="Choose Roles"
                             />
                         </div>
                     </div>

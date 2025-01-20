@@ -197,7 +197,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                 <InputText
                                     id="pageCode"
                                     type="text"
-                                    tooltip="Enter your Page Code"
                                     value={selectedPageTmp?.code || ''}
                                     disabled
                                     className="p-inputtext p-inputtext-lg"
@@ -206,7 +205,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                 <InputText
                                     id="pageCode"
                                     type="text"
-                                    tooltip="Enter your Page Code"
                                     value={selectedPageTmp?.code || ''}
                                     onChange={(e) => {
                                         if (selectedPageTmp) {
@@ -224,7 +222,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="pageName"
                                 type="text"
-                                tooltip="Enter your Page Name"
                                 value={selectedPageTmp?.name || ''}
                                 onChange={(e) => {
                                     if (selectedPageTmp) {
@@ -241,7 +238,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="pageParentCode"
                                 type="text"
-                                tooltip="Enter your Page Parent Code"
                                 value={selectedPageTmp?.parentCode || ''}
                                 disabled
                                 className="p-inputtext p-inputtext-lg"
@@ -253,7 +249,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="pageLevel"
                                 type="number"
-                                tooltip="Enter your Page Level"
                                 value={selectedPageTmp?.level?.toString() || ''}
                                 disabled
                                 className="p-inputtext p-inputtext-lg"
@@ -265,7 +260,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="pageURL"
                                 type="text"
-                                tooltip="Enter your Page URL"
                                 value={selectedPageTmp?.url || ''}
                                 onChange={(e) => {
                                     if (selectedPageTmp) {
@@ -282,7 +276,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="pageIcon"
                                 type="text"
-                                tooltip="Enter your Page Icon"
                                 value={selectedPageTmp?.icon || ''}
                                 onChange={(e) => {
                                     if (selectedPageTmp) {
@@ -309,7 +302,6 @@ export default function treePage({ session: initialSession }: SessionProp) {
                                 placeholder="Select Actions"
                                 maxSelectedLabels={4}
                                 className="p-multiselect-lg"
-                                tooltip="Choose Actions"
                                 selectedItemsLabel="Selected Actions"
                             />
                         </div>

@@ -8,7 +8,7 @@ export default async function Home() {
   const session: Session | null = await getServerSession(authOptions);
   return (
     <>
-      {!session ? <LoginPage/> : <HomePage/>}
+      {!session ? <LoginPage/> : <HomePage session={session}/>}
     </>
   )
 }

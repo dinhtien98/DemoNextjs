@@ -160,7 +160,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                     </div>
                 </div >
             </div>
-            <Dialog header={isEdit ? 'Update Role' : 'Add New Role'} visible={visible} style={{ width: '1024px' }} onHide={() => { if (!visible) return; setVisible(false); }} className="p-dialog-default" closable={false}>
+            <Dialog header={isEdit ? 'Update Product' : 'Add New Product'} visible={visible} style={{ width: '1024px' }} onHide={() => { if (!visible) return; setVisible(false); }} className="p-dialog-default" closable={false}>
                 <div className="p-dialog-content">
                     <div className='flex flex-wrap'>
                         <div className="field w-3/6 p-2">
@@ -168,7 +168,6 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="productName"
                                 type="text"
-                                tooltip="Enter your ProductName"
                                 value={selectedProductTmp?.productName ?? ''}
                                 onChange={(e) => {
                                     if (selectedProductTmp) {
@@ -184,7 +183,6 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="description"
                                 type="text"
-                                tooltip="Enter your description"
                                 value={selectedProductTmp?.description ?? ''}
                                 onChange={(e) => {
                                     if (selectedProductTmp) {
@@ -200,7 +198,6 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="price"
                                 type="number"
-                                tooltip="Enter your price"
                                 value={(selectedProductTmp?.price ?? 0).toString()}
                                 onChange={(e) => {
                                     if (selectedProductTmp) {
@@ -216,7 +213,6 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="stockQuantity"
                                 type="number"
-                                tooltip="Enter your stockQuantity"
                                 value={(selectedProductTmp?.stockQuantity ?? 0).toString()}
                                 onChange={(e) => {
                                     if (selectedProductTmp) {
@@ -232,7 +228,6 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="category"
                                 type="number"
-                                tooltip="Enter your category"
                                 value={(selectedProductTmp?.category ?? 0).toString()}
                                 onChange={(e) => {
                                     if (selectedProductTmp) {
@@ -248,7 +243,6 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <InputText
                                 id="supplier"
                                 type="text"
-                                tooltip="Enter your supplier"
                                 value={selectedProductTmp?.supplier ?? 0}
                                 onChange={(e) => {
                                     if (selectedProductTmp) {
