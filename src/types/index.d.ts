@@ -147,6 +147,7 @@ interface Product {
     stockQuantity: number;
     category: number;
     supplier: string;
+    discount: number;
     createdTime: Date;
     createdBy: string;
     updatedTime: Date;
@@ -163,6 +164,7 @@ interface ProductTmp {
     stockQuantity: number;
     category: number;
     supplier: string;
+    discount: number;
     createdTime: Date;
     createdBy: string;
     updatedTime: Date;

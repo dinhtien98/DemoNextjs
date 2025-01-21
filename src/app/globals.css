@@ -156,3 +156,34 @@ body {
 .custom-width {
   width: calc(100vw - 15%);
 }
+
+.p-absolute-button {
+  position: absolute;
+  bottom: 8px; 
+  right: 1px;
+}
+
+.cart-icon {
+  position: relative;
+  display: inline-block;
+}
+
+.cart-icon i {
+  font-size: 24px;
+}
+
+.cart-quantity {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  color: red;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+.grid {
+  justify-content: center;
+}

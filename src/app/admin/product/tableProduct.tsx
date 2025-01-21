@@ -253,6 +253,21 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             />
                         </div>
 
+                        <div className="field w-3/6 p-2">
+                            <label htmlFor="discount">Discount</label>
+                            <InputText
+                                id="discount"
+                                type="number"
+                                value={(selectedProductTmp?.discount ?? 0).toString()}
+                                onChange={(e) => {
+                                    if (selectedProductTmp) {
+                                        setSelectedProductTmp({ ...selectedProductTmp, discount: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                    }
+                                }}
+                                className="p-inputtext p-inputtext-lg"
+                            />
+                        </div>
+
                     </div>
                 </div>
 
