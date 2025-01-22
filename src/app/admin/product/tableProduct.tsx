@@ -1,9 +1,12 @@
+/* eslint-disable prefer-const */
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
-import React from 'react'
+import React, { useRef } from 'react'
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -12,8 +15,11 @@ import { Column } from 'primereact/column';
 import { formatDate } from '@/_utils/dateUtils';
 import SideBar from '@/layouts/sideBar';
 import { useProduct } from '@/hooks/useProduct';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { FileUpload } from 'primereact/fileupload';
 
 export default function tableProduct({ session: initialSession }: SessionProp) {
+    const op = useRef<OverlayPanel>(null);
     const {
         product,
         selectedCustomers,
@@ -137,6 +143,35 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                                                 );
                                             }
 
+                                            if (['imageUrl'].includes(key)) {
+                                                return (
+                                                    <Column
+                                                        key={key}
+                                                        field={key}
+                                                        header={key.charAt(0).toUpperCase() + key.slice(1)}
+                                                        body={(rowData) => (
+                                                            <>
+                                                                <Button className='text-white bg-blue-400 p-2 rounded-lg' type="button" icon="pi pi-image" label="Image" onClick={(e) => op.current && op.current.toggle(e)} />
+                                                                <OverlayPanel ref={op} id={`overlay-panel-${rowData.id}`}>
+                                                                    <div style={{ display: 'flex', overflowX: 'scroll', gap: '10px' }}>
+                                                                        {rowData.imageUrl?.map((image: any, index: any) => (
+                                                                            <img
+                                                                                key={image.code}
+                                                                                src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${image.code}`}
+                                                                                alt={`Image ${index}`}
+                                                                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                                                                            />
+                                                                        ))}
+                                                                    </div>
+                                                                </OverlayPanel>
+                                                            </>
+                                                        )}
+                                                        style={{ minWidth: '6rem', maxWidth: '15rem' }}
+                                                    />
+                                                );
+                                            }
+
+
                                             return (
                                                 <Column
                                                     key={key}
@@ -162,112 +197,163 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
             </div>
             <Dialog header={isEdit ? 'Update Product' : 'Add New Product'} visible={visible} style={{ width: '1024px' }} onHide={() => { if (!visible) return; setVisible(false); }} className="p-dialog-default" closable={false}>
                 <div className="p-dialog-content">
-                    <div className='flex flex-wrap'>
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="ProductName">Product Name</label>
-                            <InputText
-                                id="productName"
-                                type="text"
-                                value={selectedProductTmp?.productName ?? ''}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, productName: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
-                        </div>
+                    <div className='flex flex-wrap items-start'>
+                        <div className='flex w-1/2 flex-wrap'>
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="ProductName">Product Name</label>
+                                <InputText
+                                    id="productName"
+                                    type="text"
+                                    value={selectedProductTmp?.productName ?? ''}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, productName: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
 
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="description">Description</label>
-                            <InputText
-                                id="description"
-                                type="text"
-                                value={selectedProductTmp?.description ?? ''}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, description: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
-                        </div>
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="description">Description</label>
+                                <InputText
+                                    id="description"
+                                    type="text"
+                                    value={selectedProductTmp?.description ?? ''}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, description: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
 
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="price">Price</label>
-                            <InputText
-                                id="price"
-                                type="number"
-                                value={(selectedProductTmp?.price ?? 0).toString()}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, price: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
-                        </div>
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="price">Price</label>
+                                <InputText
+                                    id="price"
+                                    type="number"
+                                    value={(selectedProductTmp?.price ?? 0).toString()}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, price: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
 
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="stockQuantity">StockQuantity</label>
-                            <InputText
-                                id="stockQuantity"
-                                type="number"
-                                value={(selectedProductTmp?.stockQuantity ?? 0).toString()}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, stockQuantity: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
-                        </div>
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="stockQuantity">StockQuantity</label>
+                                <InputText
+                                    id="stockQuantity"
+                                    type="number"
+                                    value={(selectedProductTmp?.stockQuantity ?? 0).toString()}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, stockQuantity: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
 
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="category">Category</label>
-                            <InputText
-                                id="category"
-                                type="number"
-                                value={(selectedProductTmp?.category ?? 0).toString()}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, category: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
-                        </div>
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="category">Category</label>
+                                <InputText
+                                    id="category"
+                                    type="number"
+                                    value={(selectedProductTmp?.category ?? 0).toString()}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, category: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
 
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="supplier">Supplier</label>
-                            <InputText
-                                id="supplier"
-                                type="text"
-                                value={selectedProductTmp?.supplier ?? 0}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, supplier: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
-                        </div>
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="supplier">Supplier</label>
+                                <InputText
+                                    id="supplier"
+                                    type="text"
+                                    value={selectedProductTmp?.supplier ?? 0}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, supplier: e.target.value, deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
 
-                        <div className="field w-3/6 p-2">
-                            <label htmlFor="discount">Discount</label>
-                            <InputText
-                                id="discount"
-                                type="number"
-                                value={(selectedProductTmp?.discount ?? 0).toString()}
-                                onChange={(e) => {
-                                    if (selectedProductTmp) {
-                                        setSelectedProductTmp({ ...selectedProductTmp, discount: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
-                                    }
-                                }}
-                                className="p-inputtext p-inputtext-lg"
-                            />
+                            <div className="field w-1/2 p-2">
+                                <label htmlFor="discount">Discount</label>
+                                <InputText
+                                    id="discount"
+                                    type="number"
+                                    value={(selectedProductTmp?.discount ?? 0).toString()}
+                                    onChange={(e) => {
+                                        if (selectedProductTmp) {
+                                            setSelectedProductTmp({ ...selectedProductTmp, discount: Number(e.target.value), deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date() });
+                                        }
+                                    }}
+                                    className="p-inputtext p-inputtext-lg"
+                                />
+                            </div>
                         </div>
-
+                        <div className='flex w-1/2 flex-wrap'>
+                            <div className="field w-full p-2">
+                                <label htmlFor="image">Image</label>
+                                <FileUpload
+                                    name="image"
+                                    url={'http://localhost:5004/api/UploadImage/images'}
+                                    multiple
+                                    accept="image/*"
+                                    mode="advanced"
+                                    auto
+                                    customUpload
+                                    uploadHandler={async (event) => {
+                                        try {
+                                            const formData = new FormData();
+                                            for (let file of event.files) {
+                                                formData.append('images', file);
+                                            }
+                                            const response = await fetch('http://localhost:5004/api/UploadImage/images', {
+                                                method: 'POST',
+                                                body: formData,
+                                                headers: {
+                                                    'Authorization': `Bearer ${initialSession.user?.token}`,
+                                                },
+                                            });
+                                            if (!response.ok) {
+                                                throw new Error('Failed to upload images');
+                                            }
+                                            const data = await response.json();
+                                            if (selectedProductTmp) {
+                                                setSelectedProductTmp({
+                                                    ...selectedProductTmp,
+                                                    imageUrl: data.uploadedUrls,
+                                                    deletedBy: '',
+                                                    deletedTime: new Date(),
+                                                    updatedBy: '',
+                                                    updatedTime: new Date(),
+                                                });
+                                            }
+                                        } catch (error) {
+                                            if (error instanceof Error) {
+                                                console.error('Upload failed:', error.message);
+                                            } else {
+                                                console.error('Upload failed:', error);
+                                            }
+                                        }
+                                    }}
+                                    emptyTemplate={<p className="m-0">Drag and drop image to here to upload.</p>}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 

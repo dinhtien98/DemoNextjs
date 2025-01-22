@@ -140,12 +140,14 @@ const initialStateProduct: ProductTmp = {
     stockQuantity: 0,
     category: 0,
     supplier: '',
+    discount: 0,
     createdTime: new Date(),
     createdBy: '',
     updatedTime: new Date(),
     updatedBy: '',
     deletedTime: new Date(),
     deletedBy: '',
-    deletedFlag: 0
+    deletedFlag: 0,
+    imageUrl: []
 };
 

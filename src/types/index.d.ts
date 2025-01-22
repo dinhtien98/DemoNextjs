@@ -155,6 +155,7 @@ interface Product {
     deletedTime: Date;
     deletedBy: string;
     deletedFlag: number;
+    imageUrl: JSON[];
 }
 
 interface ProductTmp {
@@ -172,5 +173,6 @@ interface ProductTmp {
     deletedTime: Date;
     deletedBy: string;
     deletedFlag: number;
+    imageUrl: JSON[];
 }
 
