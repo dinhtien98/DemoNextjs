@@ -6,7 +6,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
-import React, { useRef } from 'react'
+import React, { createRef, RefObject, useRef } from 'react'
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -39,6 +39,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
         selectedProductTmp,
         setSelectedProductTmp
     } = useProduct(initialSession);
+
 
     return (
         <div className="flex w-screen overflow-hidden">
@@ -149,23 +150,42 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                                                         key={key}
                                                         field={key}
                                                         header={key.charAt(0).toUpperCase() + key.slice(1)}
-                                                        body={(rowData) => (
-                                                            <>
-                                                                <Button className='text-white bg-blue-400 p-2 rounded-lg' type="button" icon="pi pi-image" label="Image" onClick={(e) => op.current && op.current.toggle(e)} />
-                                                                <OverlayPanel ref={op} id={`overlay-panel-${rowData.id}`}>
-                                                                    <div style={{ display: 'flex', overflowX: 'scroll', gap: '10px' }}>
-                                                                        {rowData.imageUrl?.map((image: any, index: any) => (
-                                                                            <img
-                                                                                key={image.code}
-                                                                                src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${image.code}`}
-                                                                                alt={`Image ${index}`}
-                                                                                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                                                                            />
-                                                                        ))}
-                                                                    </div>
-                                                                </OverlayPanel>
-                                                            </>
-                                                        )}
+                                                        body={(rowData) => {
+                                                            const opRef: RefObject<OverlayPanel | null> = createRef();
+                                                            return (
+                                                                <>
+                                                                    <Button
+                                                                        className="text-white bg-blue-400 p-2 rounded-lg"
+                                                                        type="button"
+                                                                        icon="pi pi-image"
+                                                                        label="Image"
+                                                                        onClick={(e) => opRef.current && opRef.current.toggle(e)}
+                                                                    />
+                                                                    <OverlayPanel ref={opRef} id={`overlay-panel-${rowData.id}`}>
+                                                                        <div
+                                                                            style={{
+                                                                                display: 'flex',
+                                                                                overflowX: 'scroll',
+                                                                                gap: '10px',
+                                                                            }}
+                                                                        >
+                                                                            {rowData.imageUrl?.map((image: any, index: any) => (
+                                                                                <img
+                                                                                    key={image.code || index}
+                                                                                    src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${image.code}`}
+                                                                                    alt={`Image ${index}`}
+                                                                                    style={{
+                                                                                        width: '100px',
+                                                                                        height: '100px',
+                                                                                        objectFit: 'cover',
+                                                                                    }}
+                                                                                />
+                                                                            ))}
+                                                                        </div>
+                                                                    </OverlayPanel>
+                                                                </>
+                                                            );
+                                                        }}
                                                         style={{ minWidth: '6rem', maxWidth: '15rem' }}
                                                     />
                                                 );
