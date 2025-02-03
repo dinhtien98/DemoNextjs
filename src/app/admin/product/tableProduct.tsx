@@ -6,7 +6,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
-import React, { createRef, RefObject, useRef } from 'react'
+import React, { createRef, RefObject, useEffect, useRef, useState } from 'react'
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -17,6 +17,7 @@ import SideBar from '@/layouts/sideBar';
 import { useProduct } from '@/hooks/useProduct';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { FileUpload } from 'primereact/fileupload';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 export default function tableProduct({ session: initialSession }: SessionProp) {
     const op = useRef<OverlayPanel>(null);
@@ -40,9 +41,92 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
         setSelectedProductTmp
     } = useProduct(initialSession);
 
+    const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [imageToDelete, setImageToDelete] = useState<any | null>(null);
+    const [productTmp, setProductTmp] = useState<any>(selectedProductTmp);
+
+    const handleDeleteImage = () => {
+        if (productTmp && imageToDelete) {
+            setProductTmp((prev:any) => ({
+                ...prev,
+                imageUrl: prev.imageUrl.filter((img: any) => img.code !== imageToDelete.code),
+            }));
+        }
+
+        setImageToDelete(null); 
+    };
+
+    const showDeleteConfirm = (image: any) => {
+        setImageToDelete(image); 
+        confirmDialog({
+            message: "Bạn có chắc chắn muốn xóa hình ảnh này?",
+            header: "Xác nhận xóa",
+            icon: "pi pi-exclamation-triangle",
+            accept: handleDeleteImage,
+            reject: () => setImageToDelete(null), 
+        });
+    };
+
+    const handleSave = async () => {
+        try {
+            setIsUploading(true);
+            let newUploadedUrls = [];
+
+            if (selectedImages.length > 0) {
+                const formData = new FormData();
+                selectedImages.forEach(file => formData.append("images", file));
+
+                const response = await fetch("http://localhost:5004/api/UploadImage/images", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        Authorization: `Bearer ${initialSession.user?.token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to upload images");
+                }
+
+                const data = await response.json();
+                newUploadedUrls = data.uploadedUrls;
+                setUploadedUrls(newUploadedUrls);
+            }
+
+            setSelectedProductTmp((prev) => ({
+                ...prev,
+                imageUrl: [
+                    ...(prev.imageUrl || []).filter((img: any, index) => img?.code !== null || index !== 0),
+                    ...newUploadedUrls
+                ],
+                deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date()
+            }));
+
+
+            setSelectedImages([]);
+        } catch (error) {
+            console.error("Error while saving product:", error);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+    useEffect(() => {
+        if (!isUploading && uploadedUrls.length > 0) {
+            if (isEdit) {
+                handleUpdate();
+            } else {
+                handleAdd();
+            }
+
+            setUploadedUrls([]);
+            setIsEdit(false);
+        }
+    }, [selectedProductTmp.imageUrl, isUploading]);
 
     return (
-        <div className="flex w-screen overflow-hidden">
+        <div className="flex overflow-hidden">
             <div className="flex-none! w-1/4! bg-white"><SideBar session={initialSession} /></div>
             <div className="flex-grow! bg-white">
                 <div className="p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2 ">
@@ -329,48 +413,36 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                                 <label htmlFor="image">Image</label>
                                 <FileUpload
                                     name="image"
-                                    url={'http://localhost:5004/api/UploadImage/images'}
                                     multiple
                                     accept="image/*"
                                     mode="advanced"
-                                    auto
                                     customUpload
-                                    uploadHandler={async (event) => {
-                                        try {
-                                            const formData = new FormData();
-                                            for (let file of event.files) {
-                                                formData.append('images', file);
-                                            }
-                                            const response = await fetch('http://localhost:5004/api/UploadImage/images', {
-                                                method: 'POST',
-                                                body: formData,
-                                                headers: {
-                                                    'Authorization': `Bearer ${initialSession.user?.token}`,
-                                                },
-                                            });
-                                            if (!response.ok) {
-                                                throw new Error('Failed to upload images');
-                                            }
-                                            const data = await response.json();
-                                            if (selectedProductTmp) {
-                                                setSelectedProductTmp({
-                                                    ...selectedProductTmp,
-                                                    imageUrl: data.uploadedUrls,
-                                                    deletedBy: '',
-                                                    deletedTime: new Date(),
-                                                    updatedBy: '',
-                                                    updatedTime: new Date(),
-                                                });
-                                            }
-                                        } catch (error) {
-                                            if (error instanceof Error) {
-                                                console.error('Upload failed:', error.message);
-                                            } else {
-                                                console.error('Upload failed:', error);
-                                            }
-                                        }
+                                    auto={false}
+                                    onSelect={(event) => {
+                                        setSelectedImages([...selectedImages, ...event.files]);
                                     }}
-                                    emptyTemplate={<p className="m-0">Drag and drop image to here to upload.</p>}
+                                    emptyTemplate={
+                                        <div>
+                                            {selectedProductTmp?.imageUrl?.length > 0 && (
+                                                <div className="uploaded-images">
+                                                    {selectedProductTmp.imageUrl.map((image: any, index: number) => (
+                                                        <div key={index} className="uploaded-image-container relative my-2">
+                                                            <i
+                                                                className="pi pi-times absolute top-0 right-0 p-2 cursor-pointer bg-gray-800 text-white rounded-full border-2 border-white"
+                                                                onClick={() => showDeleteConfirm(image)}
+                                                            />
+                                                            <img
+                                                                src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${image.code}`}
+                                                                alt={`Uploaded ${index}`}
+                                                                className="uploaded-image"
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                    <ConfirmDialog />
+                                                </div>
+                                            )}
+                                        </div>
+                                    }
                                 />
                             </div>
                         </div>
@@ -382,7 +454,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                         className="p-button-text text-red-500"
                         label="Close"
                         icon="pi pi-times"
-                        onClick={() => {
+                        onClick={async () => {
                             setIsEdit(false);
                             setVisible(false);
                         }}
@@ -392,8 +464,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                         label="Save"
                         icon="pi pi-check"
                         onClick={() => {
-                            isEdit ? handleUpdate() : handleAdd();
-                            setIsEdit(false);
+                            handleSave();
                         }}
                     />
                 </div>

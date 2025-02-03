@@ -40,7 +40,7 @@ export default function tableUser({ session: initialSession }: SessionProp) {
     const rolesProps = roles?.map(role => ({ name: role.name, code: role.code }));
 
     return (
-        <div className="flex w-screen overflow-hidden">
+        <div className="flex overflow-hidden">
             <div className="flex-none! w-1/4! bg-white"><SideBar session={initialSession} /></div>
             <div className="flex-grow! bg-white">
                 <div className="p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2 ">

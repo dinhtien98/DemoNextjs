@@ -41,7 +41,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
     const actionProps = actions?.map((action) => ({ code: action.actionCode }));
 
     return (
-        <div className="flex w-screen overflow-hidden">
+        <div className="flex overflow-hidden">
             <div className="flex-none! w-1/4! bg-white"><SideBar session={initialSession} /></div>
             <div className="flex-grow! bg-white">
                 <div className="p-2 flex flex-col md:flex-row gap-4 shadow-lg rounded-lg mx-2 ">
@@ -74,7 +74,7 @@ export default function tableRole({ session: initialSession }: SessionProp) {
                             </div>
                         </div>
                         <div>
-                            <div className="custom-width">
+                            <div className="custom-width-role">
                                 <DataTable
                                     value={roles || []}
                                     paginator
