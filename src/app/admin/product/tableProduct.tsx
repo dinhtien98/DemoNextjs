@@ -48,26 +48,37 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
     const [productTmp, setProductTmp] = useState<any>(selectedProductTmp);
 
     const handleDeleteImage = () => {
-        if (productTmp && imageToDelete) {
-            setProductTmp((prev:any) => ({
-                ...prev,
-                imageUrl: prev.imageUrl.filter((img: any) => img.code !== imageToDelete.code),
-            }));
+        if (!imageToDelete) {
+            console.error('imageToDelete is null or undefined');
+            return;
         }
 
-        setImageToDelete(null); 
+        setProductTmp((prev: any) => ({
+            ...prev,
+            imageUrl: prev.imageUrl.filter((img: any) => img.code !== imageToDelete.code),
+        }));
+
+        setImageToDelete(null);
     };
 
-    const showDeleteConfirm = (image: any) => {
-        setImageToDelete(image); 
+    useEffect(() => {
+        if (!imageToDelete) {
+            return;
+        }
+        showDeleteConfirm();
+    }, [imageToDelete]);
+
+    const showDeleteConfirm = () => {
         confirmDialog({
             message: "Bạn có chắc chắn muốn xóa hình ảnh này?",
             header: "Xác nhận xóa",
             icon: "pi pi-exclamation-triangle",
-            accept: handleDeleteImage,
-            reject: () => setImageToDelete(null), 
+            defaultFocus: 'accept',
+            accept: () => handleDeleteImage(),
+            reject: () => setImageToDelete(null),
         });
     };
+
 
     const handleSave = async () => {
         try {
@@ -103,9 +114,30 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                 ],
                 deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date()
             }));
-
-
             setSelectedImages([]);
+
+            const imageDelete = selectedProductTmp.imageUrl.filter((img: any) => img.code !== productTmp.code);
+
+            await Promise.all(imageDelete.map(async (img: any) => {
+                try {
+                    const res = await fetch("http://localhost:5004/api/UploadImage/delete-image", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${initialSession.user?.token}`,
+                        },
+                        body: JSON.stringify(img.code),
+                    });
+
+                    if (!res.ok) {
+                        throw new Error("Failed to delete image");
+                    }
+                } catch (error) {
+                    console.error("Error while deleting image:", error);
+                }
+            }));
+
+
         } catch (error) {
             console.error("Error while saving product:", error);
         } finally {
@@ -124,6 +156,10 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
             setIsEdit(false);
         }
     }, [selectedProductTmp.imageUrl, isUploading]);
+
+    useEffect(() => {
+        setProductTmp(selectedProductTmp);
+    }, [selectedProductTmp]);
 
     return (
         <div className="flex overflow-hidden">
@@ -423,13 +459,13 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                                     }}
                                     emptyTemplate={
                                         <div>
-                                            {selectedProductTmp?.imageUrl?.length > 0 && (
+                                            {productTmp?.imageUrl?.length > 0 && (
                                                 <div className="uploaded-images">
-                                                    {selectedProductTmp.imageUrl.map((image: any, index: number) => (
+                                                    {productTmp.imageUrl.map((image: any, index: number) => (
                                                         <div key={index} className="uploaded-image-container relative my-2">
                                                             <i
                                                                 className="pi pi-times absolute top-0 right-0 p-2 cursor-pointer bg-gray-800 text-white rounded-full border-2 border-white"
-                                                                onClick={() => showDeleteConfirm(image)}
+                                                                onClick={() => setImageToDelete(image)}
                                                             />
                                                             <img
                                                                 src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${image.code}`}

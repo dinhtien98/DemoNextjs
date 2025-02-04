@@ -157,13 +157,13 @@ body {
   width: calc(100vw - 15%);
 }
 
-.custom-width-role{
+.custom-width-role {
   width: calc(100vw - 20%);
 }
 
 .p-absolute-button {
   position: absolute;
-  bottom: 8px; 
+  bottom: 8px;
   right: 1px;
 }
 
@@ -190,4 +190,18 @@ body {
 
 .grid {
   justify-content: center;
+}
+
+.p-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.p-confirm-dialog-accept {
+  align-items: center;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: all .3s;
 }
