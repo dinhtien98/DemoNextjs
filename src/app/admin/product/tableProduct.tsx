@@ -20,7 +20,6 @@ import { FileUpload } from 'primereact/fileupload';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
 export default function tableProduct({ session: initialSession }: SessionProp) {
-    const op = useRef<OverlayPanel>(null);
     const {
         product,
         selectedCustomers,
@@ -30,137 +29,18 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
         setIsEdit,
         selectAll,
         handleDelete,
-        handleAdd,
-        handleUpdate,
         onSelectionChange,
         onSelectAllChange,
         setSearchValue,
         searchValue,
         users,
         selectedProductTmp,
-        setSelectedProductTmp
+        setSelectedProductTmp,
+        setSelectedImages,
+        selectedImages,
+        setImageToDelete,
+        handleSave,
     } = useProduct(initialSession);
-
-    const [selectedImages, setSelectedImages] = useState<File[]>([]);
-    const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
-    const [isUploading, setIsUploading] = useState(false);
-    const [imageToDelete, setImageToDelete] = useState<any | null>(null);
-    const [productTmp, setProductTmp] = useState<any>(selectedProductTmp);
-
-    const handleDeleteImage = () => {
-        if (!imageToDelete) {
-            console.error('imageToDelete is null or undefined');
-            return;
-        }
-
-        setProductTmp((prev: any) => ({
-            ...prev,
-            imageUrl: prev.imageUrl.filter((img: any) => img.code !== imageToDelete.code),
-        }));
-
-        setImageToDelete(null);
-    };
-
-    useEffect(() => {
-        if (!imageToDelete) {
-            return;
-        }
-        showDeleteConfirm();
-    }, [imageToDelete]);
-
-    const showDeleteConfirm = () => {
-        confirmDialog({
-            message: "Bạn có chắc chắn muốn xóa hình ảnh này?",
-            header: "Xác nhận xóa",
-            icon: "pi pi-exclamation-triangle",
-            defaultFocus: 'accept',
-            accept: () => handleDeleteImage(),
-            reject: () => setImageToDelete(null),
-        });
-    };
-
-
-    const handleSave = async () => {
-        try {
-            setIsUploading(true);
-            let newUploadedUrls = [];
-
-            if (selectedImages.length > 0) {
-                const formData = new FormData();
-                selectedImages.forEach(file => formData.append("images", file));
-
-                const response = await fetch("http://localhost:5004/api/UploadImage/images", {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        Authorization: `Bearer ${initialSession.user?.token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to upload images");
-                }
-
-                const data = await response.json();
-                newUploadedUrls = data.uploadedUrls;
-                setUploadedUrls(newUploadedUrls);
-            }
-
-            setSelectedProductTmp((prev) => ({
-                ...prev,
-                imageUrl: [
-                    ...(prev.imageUrl || []).filter((img: any, index) => img?.code !== null || index !== 0),
-                    ...newUploadedUrls
-                ],
-                deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date()
-            }));
-            setSelectedImages([]);
-
-            const imageDelete = selectedProductTmp.imageUrl.filter((img: any) => img.code !== productTmp.code);
-
-            await Promise.all(imageDelete.map(async (img: any) => {
-                try {
-                    const res = await fetch("http://localhost:5004/api/UploadImage/delete-image", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${initialSession.user?.token}`,
-                        },
-                        body: JSON.stringify(img.code),
-                    });
-
-                    if (!res.ok) {
-                        throw new Error("Failed to delete image");
-                    }
-                } catch (error) {
-                    console.error("Error while deleting image:", error);
-                }
-            }));
-
-
-        } catch (error) {
-            console.error("Error while saving product:", error);
-        } finally {
-            setIsUploading(false);
-        }
-    };
-    useEffect(() => {
-        if (!isUploading && uploadedUrls.length > 0) {
-            if (isEdit) {
-                handleUpdate();
-            } else {
-                handleAdd();
-            }
-
-            setUploadedUrls([]);
-            setIsEdit(false);
-        }
-    }, [selectedProductTmp.imageUrl, isUploading]);
-
-    useEffect(() => {
-        setProductTmp(selectedProductTmp);
-    }, [selectedProductTmp]);
-
     return (
         <div className="flex overflow-hidden">
             <div className="flex-none! w-1/4! bg-white"><SideBar session={initialSession} /></div>
@@ -459,9 +339,9 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                                     }}
                                     emptyTemplate={
                                         <div>
-                                            {productTmp?.imageUrl?.length > 0 && (
+                                            {selectedProductTmp?.imageUrl?.length > 0 && (
                                                 <div className="uploaded-images">
-                                                    {productTmp.imageUrl.map((image: any, index: number) => (
+                                                    {selectedProductTmp.imageUrl.map((image: any, index: number) => (
                                                         <div key={index} className="uploaded-image-container relative my-2">
                                                             <i
                                                                 className="pi pi-times absolute top-0 right-0 p-2 cursor-pointer bg-gray-800 text-white rounded-full border-2 border-white"

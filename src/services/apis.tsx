@@ -64,6 +64,26 @@ export const fetchPostData = async (token: string, endpoint: string, data: any) 
     }
 }
 
+export const fetchPostImageData = async (token: string, endpoint: string, formData: any) => {
+
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/${endpoint}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+        return response;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+}
+
 export const fetchDeleteData = async (token: string, endpoint: string, id: any, data: any) => {
 
     try {

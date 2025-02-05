@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { getServerSession, Session } from 'next-auth';
-import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData } from '@/services/apis';
+import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData, fetchPostImageData } from '@/services/apis';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } from 'primereact/datatable';
+import { confirmDialog } from 'primereact/confirmdialog';
+import { on } from 'events';
 
 export const useProduct = (initialSession: Session | null) => {
     const [session, setSession] = useState<Session | null>(initialSession);
@@ -16,9 +20,14 @@ export const useProduct = (initialSession: Session | null) => {
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [selectedProductTmp, setSelectedProductTmp] = useState<ProductTmp>(initialStateProduct);
     const [searchValue, setSearchValue] = useState('');
+    const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [imageToDelete, setImageToDelete] = useState<any | null>(null);
 
     const endpointProduct = 'AuthProduct';
     const endpointUser = 'authUser';
+    const endpointUploadImage = 'UploadImage/images';
+    const endpointDeleteImage = 'UploadImage/delete-image';
 
     const get_Session = async () => {
         const sessionData = await getServerSession(authOptions);
@@ -69,6 +78,30 @@ export const useProduct = (initialSession: Session | null) => {
         }
     };
 
+    const handleDeleteImage = async () => {
+        if (!imageToDelete) {
+            console.error('imageToDelete is null or undefined');
+            return;
+        }
+
+        if (session?.user?.token) {
+            await fetchPostData(session.user.token, endpointDeleteImage, imageToDelete.code);
+        }
+        setImageToDelete(null);
+    };
+
+    const showDeleteConfirm = () => {
+        confirmDialog({
+            message: "Bạn có chắc chắn muốn xóa hình ảnh này?",
+            header: "Xác nhận xóa",
+            icon: "pi pi-exclamation-triangle",
+            defaultFocus: 'accept',
+            accept: () => handleDeleteImage(),
+            reject: () => setImageToDelete(null),
+        });
+    };
+
+
     useEffect(() => {
         if (!initialSession) {
             get_Session();
@@ -109,6 +142,65 @@ export const useProduct = (initialSession: Session | null) => {
         setSelectedCustomers(event.checked ? product : []);
     };
 
+    useEffect(() => {
+        if (!imageToDelete) {
+            return;
+        }
+        showDeleteConfirm();
+    }, [imageToDelete]);
+
+    const handleSave = async () => {
+        try {
+            setIsUploading(false);
+            let newUploadedUrls = [];
+
+            if (selectedImages.length > 0) {
+                const formData = new FormData();
+                selectedImages.forEach(file => formData.append("images", file));
+                if (session?.user?.token) {
+                    const response = await fetchPostImageData(session.user.token, endpointUploadImage, formData);
+                    const data = await response.json();
+                    newUploadedUrls = data.uploadedUrls;
+                }
+            }
+
+            setSelectedProductTmp((prev) => ({
+                ...prev,
+                imageUrl: [
+                    ...(prev.imageUrl || []).filter((img: any, index) => img?.code !== null || index !== 0),
+                    ...newUploadedUrls
+                ],
+                deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date()
+            }));
+            setSelectedImages([]);
+            setVisible(false);
+        } catch (error) {
+            console.error("Error while saving product:", error);
+        } finally {
+            setIsUploading(false);
+        }
+
+        setIsUploading(true);
+    };
+
+    useEffect(() => {
+        if(!visible){
+            selectedCustomers && setSelectedCustomers([]);
+        }
+        
+    }, [visible]);
+
+    useEffect(() => {
+        if (isUploading) {
+            if (isEdit) {
+                handleUpdate();
+            } else {
+                handleAdd();
+            }
+            setIsEdit(false);
+        }
+    }, [isUploading]);
+
     return {
         session,
         selectedCustomers,
@@ -129,7 +221,14 @@ export const useProduct = (initialSession: Session | null) => {
         setSearchValue,
         users,
         setSelectedProductTmp,
-        selectedProductTmp
+        selectedProductTmp,
+        handleDeleteImage,
+        showDeleteConfirm,
+        setSelectedImages,
+        selectedImages,
+        setImageToDelete,
+        imageToDelete,
+        handleSave,
     };
 };
 
