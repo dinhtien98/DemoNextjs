@@ -7,7 +7,7 @@ import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData, fetchPostIm
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { DataTableSelectAllChangeEvent, DataTableSelectionMultipleChangeEvent } from 'primereact/datatable';
 import { confirmDialog } from 'primereact/confirmdialog';
-import { on } from 'events';
+import { get } from 'http';
 
 export const useProduct = (initialSession: Session | null) => {
     const [session, setSession] = useState<Session | null>(initialSession);
@@ -19,9 +19,8 @@ export const useProduct = (initialSession: Session | null) => {
     const [visible, setVisible] = useState<boolean>(false);
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [selectedProductTmp, setSelectedProductTmp] = useState<ProductTmp>(initialStateProduct);
-    const [searchValue, setSearchValue] = useState('');
+    const [searchValue, setSearchValue] = useState(''); 
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
-    const [isUploading, setIsUploading] = useState(false);
     const [imageToDelete, setImageToDelete] = useState<any | null>(null);
 
     const endpointProduct = 'AuthProduct';
@@ -66,15 +65,45 @@ export const useProduct = (initialSession: Session | null) => {
             await fetchPostData(session.user.token, endpointProduct, selectedProductTmp);
             setVisible(false);
             get_Product();
+            setSelectedCustomers([]);
         }
     };
 
     const handleUpdate = async () => {
         const id = selectedCustomers ? selectedCustomers.map(product => product.id) : [];
         if (session?.user?.token) {
-            await fetchPutData(session.user.token, endpointProduct, id, selectedProductTmp);
-            setVisible(false);
-            get_Product();
+            try {
+                let newUploadedUrls: string[] = [];
+                if (selectedImages.length > 0) {
+                    const formData = new FormData();
+                    selectedImages.forEach(file => formData.append("images", file));
+                    if (session?.user?.token) {
+                        const response = await fetchPostImageData(session.user.token, endpointUploadImage, formData);
+                        const data = await response.json();
+                        newUploadedUrls = data.uploadedUrls || [];
+                    }
+                }
+                const updatedProductTmp = {
+                    ...selectedProductTmp,
+                    imageUrl: [
+                        ...(selectedProductTmp.imageUrl || []).filter((img: any, index) => img !== null && index !== 0),
+                        ...newUploadedUrls,
+                    ].filter(img => img !== null),
+                    deletedBy: '',
+                    deletedTime: new Date(),
+                    updatedBy: '',
+                    updatedTime: new Date(),
+                };
+
+                await fetchPutData(session.user.token, endpointProduct, id, updatedProductTmp);
+                
+                setVisible(false);
+                get_Product();
+                setSelectedCustomers([]);
+                setSelectedImages([]);
+            } catch (error) {
+                console.error("Error while saving product:", error);
+            }
         }
     };
 
@@ -88,6 +117,7 @@ export const useProduct = (initialSession: Session | null) => {
             await fetchPostData(session.user.token, endpointDeleteImage, imageToDelete.code);
         }
         setImageToDelete(null);
+        get_Product();
     };
 
     const showDeleteConfirm = () => {
@@ -150,56 +180,13 @@ export const useProduct = (initialSession: Session | null) => {
     }, [imageToDelete]);
 
     const handleSave = async () => {
-        try {
-            setIsUploading(false);
-            let newUploadedUrls = [];
-
-            if (selectedImages.length > 0) {
-                const formData = new FormData();
-                selectedImages.forEach(file => formData.append("images", file));
-                if (session?.user?.token) {
-                    const response = await fetchPostImageData(session.user.token, endpointUploadImage, formData);
-                    const data = await response.json();
-                    newUploadedUrls = data.uploadedUrls;
-                }
-            }
-
-            setSelectedProductTmp((prev) => ({
-                ...prev,
-                imageUrl: [
-                    ...(prev.imageUrl || []).filter((img: any, index) => img?.code !== null || index !== 0),
-                    ...newUploadedUrls
-                ],
-                deletedBy: '', deletedTime: new Date(), updatedBy: '', updatedTime: new Date()
-            }));
-            setSelectedImages([]);
-            setVisible(false);
-        } catch (error) {
-            console.error("Error while saving product:", error);
-        } finally {
-            setIsUploading(false);
+        if (isEdit) {
+            handleUpdate();
+        } else {
+            handleAdd();
         }
-
-        setIsUploading(true);
+        setIsEdit(false);
     };
-
-    useEffect(() => {
-        if(!visible){
-            selectedCustomers && setSelectedCustomers([]);
-        }
-        
-    }, [visible]);
-
-    useEffect(() => {
-        if (isUploading) {
-            if (isEdit) {
-                handleUpdate();
-            } else {
-                handleAdd();
-            }
-            setIsEdit(false);
-        }
-    }, [isUploading]);
 
     return {
         session,

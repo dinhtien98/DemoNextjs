@@ -17,7 +17,7 @@ import SideBar from '@/layouts/sideBar';
 import { useProduct } from '@/hooks/useProduct';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { FileUpload } from 'primereact/fileupload';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 
 export default function tableProduct({ session: initialSession }: SessionProp) {
     const {
@@ -39,7 +39,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
         setSelectedImages,
         selectedImages,
         setImageToDelete,
-        handleSave,
+        handleSave
     } = useProduct(initialSession);
     return (
         <div className="flex overflow-hidden">
@@ -328,6 +328,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <div className="field w-full p-2">
                                 <label htmlFor="image">Image</label>
                                 <FileUpload
+                                    key={selectedProductTmp?.imageUrl?.length}
                                     name="image"
                                     multiple
                                     accept="image/*"
