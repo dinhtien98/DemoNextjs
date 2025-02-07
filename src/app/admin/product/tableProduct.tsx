@@ -39,7 +39,8 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
         setSelectedImages,
         selectedImages,
         setImageToDelete,
-        handleSave
+        handleSave,
+        productTmp
     } = useProduct(initialSession);
     return (
         <div className="flex overflow-hidden">
@@ -328,7 +329,7 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                             <div className="field w-full p-2">
                                 <label htmlFor="image">Image</label>
                                 <FileUpload
-                                    key={selectedProductTmp?.imageUrl?.length}
+                                    key={productTmp?.imageUrl?.length}
                                     name="image"
                                     multiple
                                     accept="image/*"
@@ -340,9 +341,9 @@ export default function tableProduct({ session: initialSession }: SessionProp) {
                                     }}
                                     emptyTemplate={
                                         <div>
-                                            {selectedProductTmp?.imageUrl?.length > 0 && (
+                                            {productTmp?.imageUrl?.length > 0 && (
                                                 <div className="uploaded-images">
-                                                    {selectedProductTmp.imageUrl.map((image: any, index: number) => (
+                                                    {productTmp.imageUrl.map((image: any, index: number) => (
                                                         <div key={index} className="uploaded-image-container relative my-2">
                                                             <i
                                                                 className="pi pi-times absolute top-0 right-0 p-2 cursor-pointer bg-gray-800 text-white rounded-full border-2 border-white"

@@ -97,7 +97,7 @@ export default function HomePage({ session: initialSession }: SessionProp) {
                     <div className="relative">
                         <img
                             className="w-48 shadow-2 border-round"
-                            src="https://www.sachbaokhang.vn/uploads/files/2023/05/01/van-1.jpg"
+                            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${(product.imageUrl[0] as unknown as { code: string }).code}`}
                             alt={product.productName}
                         />
                         <Button

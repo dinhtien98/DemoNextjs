@@ -22,6 +22,7 @@ export const useProduct = (initialSession: Session | null) => {
     const [searchValue, setSearchValue] = useState(''); 
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [imageToDelete, setImageToDelete] = useState<any | null>(null);
+    const [productTmp, setProductTmp] = useState<ProductTmp>(selectedProductTmp);
 
     const endpointProduct = 'AuthProduct';
     const endpointUser = 'authUser';
@@ -112,13 +113,18 @@ export const useProduct = (initialSession: Session | null) => {
             console.error('imageToDelete is null or undefined');
             return;
         }
-
+        setProductTmp(selectedProductTmp);
+        productTmp.imageUrl = productTmp.imageUrl?.filter((img: any) => img.code !== imageToDelete.code);
         if (session?.user?.token) {
             await fetchPostData(session.user.token, endpointDeleteImage, imageToDelete.code);
         }
         setImageToDelete(null);
         get_Product();
     };
+
+    useEffect(() => {
+        setProductTmp(selectedProductTmp);
+    }, [selectedProductTmp]);
 
     const showDeleteConfirm = () => {
         confirmDialog({
@@ -143,7 +149,7 @@ export const useProduct = (initialSession: Session | null) => {
     useEffect(() => {
         if (isEdit && selectedCustomers && selectedCustomers.length === 1) {
             const product = selectedCustomers[0];
-            setSelectedProductTmp({ ...product })
+            setSelectedProductTmp({ ...product });
         } else {
             setSelectedProductTmp(initialStateProduct);
         }
@@ -216,6 +222,7 @@ export const useProduct = (initialSession: Session | null) => {
         setImageToDelete,
         imageToDelete,
         handleSave,
+        productTmp,
     };
 };
 
