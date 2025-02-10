@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 'use client';
@@ -5,6 +6,7 @@
 import { fetchGetData } from '@/services/apis';
 import { Session } from 'next-auth';
 import { Button } from 'primereact/button';
+import { Carousel } from 'primereact/carousel';
 import { DataView } from 'primereact/dataview';
 import { Dialog } from 'primereact/dialog';
 import React, { useEffect, useState } from 'react';
@@ -67,14 +69,20 @@ export default function HomePage({ session: initialSession }: SessionProp) {
     };
 
     const removeFromCart = (productId: string) => {
-        const updatedCart = { ...cart };
-        delete updatedCart[productId]; 
-        setCart(updatedCart);
-      };
-      
+        setCart((prevCart) => {
+            const updatedCart = { ...prevCart };
+            delete updatedCart[productId];
+
+            const totalQuantity = Object.values(updatedCart).reduce((total, item) => total + item.quantity, 0);
+            setCartQuantity(totalQuantity);
+
+            return updatedCart;
+        });
+    };
+
 
     const calculateTotal = () => {
-        return Object.values(cart).reduce((total, item) => total + item.product.price * item.quantity, 0);
+        return Object.values(cart).reduce((total, item) => total + item.product.price * (1 - item.product.discount / 100) * item.quantity, 0);
     };
 
     const scrollToTop = () => {
@@ -189,7 +197,15 @@ export default function HomePage({ session: initialSession }: SessionProp) {
                                                                     onClick={() => updateQuantity(productId, quantity - 1)}
                                                                     className="p-button-rounded p-button-outlined"
                                                                 />
-                                                                <span>{quantity}</span>
+                                                                <input
+                                                                    type="number"
+                                                                    value={quantity}
+                                                                    onChange={(e) => {
+                                                                        const value = parseInt(e.target.value);
+                                                                        updateQuantity(productId, isNaN(value) ? 1 : value);
+                                                                    }}
+                                                                    className="w-10 text-center"
+                                                                />
                                                                 <Button
                                                                     icon="pi pi-plus"
                                                                     onClick={() => updateQuantity(productId, quantity + 1)}
@@ -197,7 +213,7 @@ export default function HomePage({ session: initialSession }: SessionProp) {
                                                                 />
                                                             </div>
                                                         </div>
-                                                        <div className="whitespace-nowrap">Total: ${product.price * quantity}</div>
+                                                        <div className="whitespace-nowrap">Total: ${product.price * (1 - product.discount / 100) * quantity}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -248,17 +264,31 @@ export default function HomePage({ session: initialSession }: SessionProp) {
             <Dialog
                 header="Product Detail"
                 visible={visible}
-                style={{ width: '50vw' }}
+                style={{ width: '80vw' }}
                 onHide={() => setVisible(false)}
             >
                 {selectedProduct ? (
                     <div className="p-2 border border-solid border-gray-300 rounded-lg">
                         <div className='flex space-x-2'>
-                            <img
-                                className="w-64 shadow-2 border-round"
-                                src="https://www.sachbaokhang.vn/uploads/files/2023/05/01/van-1.jpg"
-                                alt={selectedProduct.productName}
-                            />
+                            <div className="card w-2/3">
+                                <Carousel
+                                    value={selectedProduct.imageUrl}
+                                    itemTemplate={(image) => (
+                                        <div className='p-2'>
+                                            <img
+                                                src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${image.code}`}
+                                                alt={`Image ${image.id}`}
+                                                style={{
+                                                    objectFit: 'cover',
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    numVisible={1}
+                                    numScroll={1}
+                                    circular={true}
+                                />
+                            </div>
                             <div>
                                 <div className="text-xl font-bold mt-3">{selectedProduct.productName}</div>
                                 <div className="text-xl">Description: {selectedProduct.description}</div>
