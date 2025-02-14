@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { getServerSession, Session } from 'next-auth';
 import { fetchGetData, fetchPostData, fetchPutData, fetchDeleteData } from '@/services/apis';

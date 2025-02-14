@@ -1,9 +1,6 @@
-/* eslint-disable prefer-const */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 import React, { createRef, RefObject, useEffect, useRef, useState } from 'react'

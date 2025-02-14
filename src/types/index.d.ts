@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-wrapper-object-types */
 interface SessionProp {
     session: Session;
 }

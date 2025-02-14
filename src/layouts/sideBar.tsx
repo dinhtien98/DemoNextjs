@@ -19,7 +19,12 @@ export default function SideBar({ session: initialSession }: SessionProp) {
   const STORAGE_KEY_EXPANDED = 'tree_expandedKeys';
 
   const [expandedKeys, setExpandedKeys] = useState<{ [key: string]: boolean }>(
-    () => JSON.parse(sessionStorage.getItem(STORAGE_KEY_EXPANDED) || '{}')
+    () => {
+      if (typeof window !== "undefined") {
+        return JSON.parse(sessionStorage.getItem(STORAGE_KEY_EXPANDED) || "{}");
+      }
+      return {};
+    }
   );
   const [activeNodeKey, setActiveNodeKey] = useState<string | null>(null); 
 

@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable @next/next/no-async-client-component */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { FormEvent, useState } from 'react';

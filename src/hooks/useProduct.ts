@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
@@ -63,10 +62,38 @@ export const useProduct = (initialSession: Session | null) => {
 
     const handleAdd = async () => {
         if (session?.user?.token) {
-            await fetchPostData(session.user.token, endpointProduct, selectedProductTmp);
-            setVisible(false);
-            get_Product();
-            setSelectedCustomers([]);
+            try {
+                let newUploadedUrls: string[] = [];
+                if (selectedImages.length > 0) {
+                    const formData = new FormData();
+                    selectedImages.forEach(file => formData.append("images", file));
+                    if (session?.user?.token) {
+                        const response = await fetchPostImageData(session.user.token, endpointUploadImage, formData);
+                        const data = await response.json();
+                        newUploadedUrls = data.uploadedUrls || [];
+                    }
+                }
+                const updatedProductTmp = {
+                    ...selectedProductTmp,
+                    imageUrl: [
+                        ...(selectedProductTmp.imageUrl || []).filter((img: any, index) => img !== null && index !== 0),
+                        ...newUploadedUrls,
+                    ].filter(img => img !== null),
+                    deletedBy: '',
+                    deletedTime: new Date(),
+                    updatedBy: '',
+                    updatedTime: new Date(),
+                };
+
+                await fetchPostData(session.user.token, endpointProduct, updatedProductTmp);
+                
+                setVisible(false);
+                get_Product();
+                setSelectedCustomers([]);
+                setSelectedImages([]);
+            } catch (error) {
+                console.error("Error while saving product:", error);
+            }
         }
     };
 

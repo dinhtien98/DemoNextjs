@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-/* eslint-disable @next/next/no-html-link-for-pages */
 /* eslint-disable react-hooks/rules-of-hooks */
 'use client'
 import React from 'react'
