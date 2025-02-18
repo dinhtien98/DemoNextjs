@@ -18,7 +18,7 @@ export default function LoginPage() {
         password: formData.get('password'),
         redirect: false,
       })
-
+      console.log('response:', response)
       if (response?.error) {
         setError(response.error);
         return

@@ -32,7 +32,7 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials) {
                 try {
-                    const res = await fetch("http://localhost:5004/api/authLogin", {
+                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authLogin`, {
                         method: "POST",
                         body: JSON.stringify({
                             userName: credentials?.userName,

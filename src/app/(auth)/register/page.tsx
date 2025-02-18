@@ -32,7 +32,7 @@ export default function RegisterPage() {
     };
 
     try {
-      const response = await fetch('http://localhost:5004/api/authUser', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authUser`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
